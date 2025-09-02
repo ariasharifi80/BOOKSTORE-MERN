@@ -2,9 +2,13 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import "dotenv/config";
+import connectDB from "./config/mongodb.js";
 
 const app = express(); // Initialize Express Application
 const port = process.env.PORT || 4000; //Server Port
+
+await connectDB(); // Establish Connection to the database
+
 //Allow multiple origins
 const allowedOrigins = ["http://localhost:5173"];
 
