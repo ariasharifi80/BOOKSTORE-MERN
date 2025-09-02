@@ -5,6 +5,18 @@ import "dotenv/config";
 
 const app = express(); // Initialize Express Application
 const port = process.env.PORT || 4000; //Server Port
+//Allow multiple origins
+const allowedOrigins = ["http://localhost:5173"];
+
+//Middleware setup
+app.use(express.json()); // Enables JSON request body parsing
+app.use(cookieParser()); //Cookie-parser middleware to parse HTTP request cookies
+app.use(
+  cors({
+    origin: allowedOrigins, // Whitelist of allowed domains
+    credentials: true, // Require for cookies/authorization Headers
+  })
+);
 
 //Root Endpoint to check API Status
 app.get("/", (req, res) => {
