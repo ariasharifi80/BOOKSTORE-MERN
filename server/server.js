@@ -3,6 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import "dotenv/config";
 import connectDB from "./config/mongodb.js";
+import userRouter from "./routes/userRoute.js";
 
 const app = express(); // Initialize Express Application
 const port = process.env.PORT || 4000; //Server Port
@@ -21,6 +22,8 @@ app.use(
     credentials: true, // Require for cookies/authorization Headers
   })
 );
+//Define API routes
+app.use("/api/user", userRouter); // Route for user-related operations
 
 //Root Endpoint to check API Status
 app.get("/", (req, res) => {
