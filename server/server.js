@@ -3,10 +3,11 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import "dotenv/config";
 import connectDB from "./config/mongodb.js";
+import connectCloudinary from "./config/cloudinary.js";
 import userRouter from "./routes/userRoute.js";
 import adminRouter from "./routes/adminRoute.js";
-import connectCloudinary from "./config/cloudinary.js";
 import productRouter from "./routes/productRoute.js";
+import CartRouter from "./routes/cartRoute.js";
 
 const app = express(); // Initialize Express Application
 const port = process.env.PORT || 4000; //Server Port
@@ -30,6 +31,7 @@ app.use(
 app.use("/api/user", userRouter); // Routes for user-related operations
 app.use("/api/admin", adminRouter); // Routes for admin-related operations
 app.use("/api/product", productRouter); // Routes for product-related operations
+app.use("/api/cart", CartRouter); // Routes for cart-related operations
 
 //Root Endpoint to check API Status
 app.get("/", (req, res) => {
