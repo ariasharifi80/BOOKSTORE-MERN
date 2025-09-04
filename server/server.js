@@ -8,6 +8,8 @@ import userRouter from "./routes/userRoute.js";
 import adminRouter from "./routes/adminRoute.js";
 import productRouter from "./routes/productRoute.js";
 import CartRouter from "./routes/cartRoute.js";
+import addressRouter from "./routes/addressRoute.js";
+import orderRouter from "./routes/orderRoute.js";
 
 const app = express(); // Initialize Express Application
 const port = process.env.PORT || 4000; //Server Port
@@ -32,6 +34,8 @@ app.use("/api/user", userRouter); // Routes for user-related operations
 app.use("/api/admin", adminRouter); // Routes for admin-related operations
 app.use("/api/product", productRouter); // Routes for product-related operations
 app.use("/api/cart", CartRouter); // Routes for cart-related operations
+app.use("/api/address", addressRouter); // Routes for address-related operations
+app.use("/api/order", orderRouter); // Routes for order-related operations
 
 //Root Endpoint to check API Status
 app.get("/", (req, res) => {
