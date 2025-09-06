@@ -1,7 +1,10 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import upload_icon from "../../assets/upload_icon.png";
+import { ShopContext } from "../../context/ShopContext";
+import toast from "react-hot-toast";
 
 const AddProduct = () => {
+  const { axios } = useContext(ShopContext);
   const [files, setFiles] = useState([]);
   const [name, setName] = useState("");
 
@@ -11,8 +14,37 @@ const AddProduct = () => {
   const [category, setCategory] = useState("Academic");
   const [popular, setPopular] = useState(false);
 
-  const onSubmitHandler = (event) => {
+  const onSubmitHandler = async (event) => {
     event.preventDefault();
+    try {
+      const productData = {
+        name,
+        description,
+        category,
+        price,
+        offerPrice,
+        popular,
+      };
+
+      const formData = new FormData();
+      formData.append("productData", JSON.stringify(productData));
+      for (let i = 0; i < files.length; i++) {
+        formData.append("images", files[i]);
+      }
+
+      const { data } = await axios.post("/api/product/add", formData);
+      if (data.success) {
+        toast.success(data.message);
+        setName("");
+        setDescription("");
+        setFiles([]);
+        setPrice("10");
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
   };
   return (
     <div className="px-2 sm:px-6 py-12 m-2 h-[97vh] bg-primary overflow-y-scroll w-full lg:w-4/5 rounded-xl">
@@ -86,14 +118,15 @@ const AddProduct = () => {
             .fill("")
             .map((_, index) => (
               <label
-                htmlFor={`images${index}`}
+                key={index}
+                htmlFor={`image${index}`}
                 className="ring-1 ring-slate-900/10 overflow-hidden rounded"
               >
                 <input
                   onChange={(e) => {
                     const updatedFiles = [...files];
                     updatedFiles[index] = e.target.files[0];
-                    setFiles();
+                    setFiles(updatedFiles);
                   }}
                   type="file"
                   id={`image${index}`}

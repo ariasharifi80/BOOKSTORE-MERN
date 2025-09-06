@@ -49,7 +49,9 @@ export const isAdminAuth = async (req, res) => {
 };
 
 //LOGOUT ADMIN
-export const adminLogout = async (res, req) => {
+export const adminLogout = async (req, res) => {
+  console.log("Logout route hit");
+  console.log("Session data:", req.session);
   try {
     res.clearCookie("adminToken", cookieOptions);
     return res.json({ success: true, message: "Admin Logged Out" });

@@ -7,11 +7,11 @@ export const addProduct = async (req, res) => {
   try {
     const productData = JSON.parse(req.body.productData);
 
-    const images = req.file;
+    const images = req.files || [];
 
     //Upload images to cloudinary or use a default image
 
-    let imagesUrl = await promise.all(
+    let imagesUrl = await Promise.all(
       images.map(async (item) => {
         let result = await cloudinary.uploader.upload(item.path, {
           resource_type: "image",

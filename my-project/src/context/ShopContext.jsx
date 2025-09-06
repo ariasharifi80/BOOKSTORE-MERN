@@ -26,6 +26,16 @@ const ShopContextProvider = ({ children }) => {
     setBooks(dummyBooks);
   };
 
+  // Fetch Admin
+  const fetchAdmin = async () => {
+    try {
+      const { data } = await axios.get("/api/admin/is-auth");
+      setIsAdmin(data.success);
+    } catch (error) {
+      setIsAdmin(false);
+    }
+  };
+
   //Adding Items To Cart
 
   const addToCart = (itemId) => {
@@ -80,6 +90,7 @@ const ShopContextProvider = ({ children }) => {
 
   useEffect(() => {
     fetchBooks();
+    fetchAdmin();
   }, []);
 
   const value = {
