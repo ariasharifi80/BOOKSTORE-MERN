@@ -35,6 +35,24 @@ const ShopContextProvider = ({ children }) => {
     }
   };
 
+  //Fetch User
+
+  const fetchUser = async () => {
+    try {
+      const { data } = await axios.get("/api/user/is-auth");
+      if (data.success) {
+        setUser(data.user);
+        setCartItems(data.user.cartData);
+      } else {
+        setUser(null);
+        setCartItems({});
+      }
+    } catch (error) {
+      setUser(null);
+      setCartItems({});
+    }
+  };
+
   // Fetch Admin
   const fetchAdmin = async () => {
     try {
@@ -99,6 +117,7 @@ const ShopContextProvider = ({ children }) => {
 
   useEffect(() => {
     fetchBooks();
+    fetchUser();
     fetchAdmin();
   }, []);
 
@@ -125,6 +144,7 @@ const ShopContextProvider = ({ children }) => {
     setIsAdmin,
     axios,
     fetchBooks,
+    fetchUser,
   };
 
   return <ShopContext.Provider value={value}>{children}</ShopContext.Provider>;
