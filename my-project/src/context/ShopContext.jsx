@@ -1,6 +1,10 @@
 import React, { createContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { dummyBooks } from "../assets/data";
+import axios from "axios";
+
+axios.defaults.withCredentials = true;
+axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
 
 export const ShopContext = createContext();
 
@@ -99,6 +103,7 @@ const ShopContextProvider = ({ children }) => {
     setShowUserLogin,
     isAdmin,
     setIsAdmin,
+    axios,
   };
 
   return <ShopContext.Provider value={value}>{children}</ShopContext.Provider>;

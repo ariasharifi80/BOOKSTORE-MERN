@@ -2,8 +2,8 @@ import jwt from "jsonwebtoken";
 
 const cookieOptions = {
   httpOnly: true, // Prevent client-side javascript from accessing the cookie
-  secure: (process.env.APP_ENV = "production"), //Ensure the cookies is only sent over HTTPS in production
-  sameSite: (process.env.APP_ENV = "production" ? "none" : "strict"), // Controls when cookies are sent "none" allows cross-site in production, "strict" block cross-site by default
+  secure: process.env.APP_ENV === "production", //Ensure the cookies is only sent over HTTPS in production
+  sameSite: process.env.APP_ENV === "production" ? "none" : "strict", // Controls when cookies are sent "none" allows cross-site in production, "strict" block cross-site by default
 };
 
 // Admin Login Route
