@@ -27,7 +27,10 @@ const ProductList = () => {
             />
             <h5 className="text-sm font-semi-bold">{book.name}</h5>
             <p className="text-sm font-semi-bold">{book.category}</p>
-            <div className="text-sm font-semi-bold">{book.offerPrice}</div>
+            <div className="text-sm font-semi-bold">
+              {currency}
+              {book.offerPrice}
+            </div>
             <div>
               <label className="relative inline-flex items-center cursor-pointer text-gray-900 gap-3">
                 <input
