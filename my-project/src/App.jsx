@@ -20,7 +20,8 @@ import AdminLogin from "./components/admin/AdminLogin";
 import AddProduct from "./pages/admin/AddProduct";
 import ProductList from "./pages/admin/ProductList";
 import Orders from "./pages/admin/Orders";
-import ZarinpalMaintenance from "./components/zarinPalMaintenance";
+
+import Loading from "./pages/Loading";
 
 const App = () => {
   const { showUserLogin, isAdmin } = useContext(ShopContext);
@@ -40,7 +41,8 @@ const App = () => {
         <Route path="/cart" element={<Cart />} />
         <Route path="/address-form" element={<AddressForm />} />
         <Route path="/my-orders" element={<MyOrders />} />
-        <Route path="/zarinpal-maintenance" element={<ZarinpalMaintenance />} />
+        <Route path="/loader" element={<Loading />} />
+
         <Route path="/admin" element={isAdmin ? <Sidebar /> : <AdminLogin />}>
           <Route index element={isAdmin ? <AddProduct /> : null} />
           <Route path="list" element={<ProductList />} />
