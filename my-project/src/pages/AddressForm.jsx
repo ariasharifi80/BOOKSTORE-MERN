@@ -1,10 +1,11 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Title from "../components/Title";
 import CartTotal from "../components/CartTotal";
 import { ShopContext } from "../context/ShopContext";
+import toast from "react-hot-toast";
 
 const AddressForm = () => {
-  const { navigate,  user, method, setMethod } = useContext(ShopContext);
+  const { navigate, user, method, setMethod, axios } = useContext(ShopContext);
 
   const [address, setAddress] = useState({
     firstName: "",
@@ -20,15 +21,32 @@ const AddressForm = () => {
 
   const onChangeHandler = (e) => {
     const name = e.target.name;
-    const value = e.target.value
+    const value = e.target.value;
 
-    setAddress((data)=> ({...data, [name]: value}));
-    console.log(address)
-  }
+    setAddress((data) => ({ ...data, [name]: value }));
+    console.log(address);
+  };
 
-  const onSubmitHandler = (e)=> {
-    e.preventDefault()
-  }
+  const onSubmitHandler = async (e) => {
+    e.preventDefault();
+    try {
+      const { data } = await axios.post("/api/address/add", { address });
+      if (data.success) {
+        toast.success(data.message);
+        navigate("/cart");
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  useEffect(() => {
+    if (!user) {
+      navigate("/cart");
+    }
+  }, [user]);
 
   return (
     <div className="max-padd-container py-16 pt-28">
@@ -140,7 +158,6 @@ const AddressForm = () => {
         <div className="flex flex-1 flex-col">
           <div className="max-w-[379] w-full bg-primary p-5 py-10 max-md:mt-16 rounded-xl">
             <CartTotal method={method} setMethod={setMethod} />
-          
           </div>
         </div>
       </div>

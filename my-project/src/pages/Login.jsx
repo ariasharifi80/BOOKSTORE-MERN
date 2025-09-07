@@ -5,12 +5,13 @@ import toast from "react-hot-toast";
 const Login = () => {
   const { showUserLogin, navigate, setShowUserLogin, axios, fetchUser } =
     useContext(ShopContext);
-  const [state, setState] = useState("");
-  const [name, setName] = useState("second");
+  const [state, setState] = useState("login");
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const onSubmitHandler = async (event) => {
+    event.preventDefault();
     try {
       const { data } = await axios.post(`/api/user/${state}`, {
         name,
@@ -47,7 +48,7 @@ const Login = () => {
             {state === "login" ? "Login" : "Register"}
           </span>
         </h3>
-        {state === "Register" && (
+        {state === "register" && (
           <div className="w-full">
             <p className="medium-14">Name </p>
             <input

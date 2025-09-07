@@ -63,9 +63,26 @@ const ShopContextProvider = ({ children }) => {
     }
   };
 
+  //Logout User
+  const logoutUser = async () => {
+    try {
+      const { data } = await axios.post("/api/user/logout");
+      if (data.success) {
+        toast.success(data.message);
+        setUser(null);
+        setCartItems({});
+        navigate("/");
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
   //Adding Items To Cart
 
-  const addToCart = (itemId) => {
+  const addToCart = async (itemId) => {
     const cartData = { ...cartItems }; //Use shallow copy
 
     if (cartData[itemId]) {
@@ -75,6 +92,15 @@ const ShopContextProvider = ({ children }) => {
     }
 
     setCartItems(cartData);
+
+    if (user) {
+      try {
+        const { data } = await axios.post("/api/cart/add", { itemId });
+        data.success ? toast.success(data.message) : toast.error(data.message);
+      } catch (error) {
+        toast.error(error.message);
+      }
+    }
   };
 
   // Getting Total Cart Items
@@ -95,10 +121,22 @@ const ShopContextProvider = ({ children }) => {
 
   // Update the quantity
 
-  const updateQuantity = (itemId, quantity) => {
+  const updateQuantity = async (itemId, quantity) => {
     const cartData = { ...cartItems };
     cartData[itemId] = quantity;
     setCartItems(cartData);
+
+    if (user) {
+      try {
+        const { data } = await axios.post("/api/cart/update", {
+          itemId,
+          quantity,
+        });
+        data.success ? toast.success(data.message) : toast.error(data.message);
+      } catch (error) {
+        toast.error(error.message);
+      }
+    }
   };
 
   //Getting total cart amount
@@ -145,6 +183,7 @@ const ShopContextProvider = ({ children }) => {
     axios,
     fetchBooks,
     fetchUser,
+    logoutUser,
   };
 
   return <ShopContext.Provider value={value}>{children}</ShopContext.Provider>;

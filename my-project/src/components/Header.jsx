@@ -23,6 +23,7 @@ const Header = () => {
     setSearchQuery,
     getCartCount,
     setShowUserLogin,
+    logoutUser,
   } = useContext(ShopContext);
   const isShopPage = useLocation().pathname.endsWith("/shop");
 
@@ -124,7 +125,10 @@ const Header = () => {
               >
                 Orders
               </li>
-              <li className="p-2 rounded-md hover:bg-primary cursor-pointer">
+              <li
+                onClick={logoutUser}
+                className="p-2 rounded-md hover:bg-primary cursor-pointer"
+              >
                 Logout
               </li>
             </ul>

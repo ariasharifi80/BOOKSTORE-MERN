@@ -1,6 +1,6 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { ShopContext } from "../context/ShopContext";
-import { dummyAddress } from "../assets/data";
+import toast from "react-hot-toast";
 
 const CartTotal = () => {
   const {
@@ -15,11 +15,71 @@ const CartTotal = () => {
     getCartCount,
     delivery_charges,
     user,
+    axios,
   } = useContext(ShopContext);
 
-  const [addresses, setAddresses] = useState(dummyAddress);
+  const [addresses, setAddresses] = useState([]);
   const [showAddress, setShowAddress] = useState(false);
-  const [selectedAddress, setSelectedAddress] = useState(dummyAddress[0]);
+  const [selectedAddress, setSelectedAddress] = useState(null);
+
+  const getAddress = async () => {
+    try {
+      const { data } = await axios.get("/api/address/get");
+      if (data.success) {
+        setAddresses(data.addresses);
+        if (data.addresses.length > 0) {
+          setSelectedAddress(data.addresses[0]);
+        }
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  const placeOrder = async () => {
+    try {
+      if (!selectedAddress) {
+        return toast.error("Please Enter Your Address");
+      }
+      let orderItems = [];
+      for (const itemId in cartItems) {
+        const book = books.find((item) => item._id === itemId);
+        book.quantity = cartItems[itemId];
+        orderItems.push(book);
+      }
+
+      //Convert orderItems to items array for backend
+      let items = orderItems.map((item) => ({
+        product: item._id,
+        quantity: item.quantity,
+      }));
+      //Place order using COD
+      if (method === "COD") {
+        const { data } = await axios.post("/api/order/cod", {
+          items,
+          address: selectedAddress._id,
+        });
+        if (data.success) {
+          toast.success(data.message);
+          setCartItems({});
+          navigate("/my-orders");
+        } else {
+          toast.error(data.message);
+        }
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      getAddress();
+    }
+  }, [user]);
+
   return (
     <div>
       <h3 className="bold-22">
@@ -124,7 +184,7 @@ const CartTotal = () => {
           </p>
         </div>
       </div>
-      <button className="btn-dark w-full mt-8 !rounded-md">
+      <button onClick={placeOrder} className="btn-dark w-full mt-8 !rounded-md">
         Proceed to Order
       </button>
     </div>
