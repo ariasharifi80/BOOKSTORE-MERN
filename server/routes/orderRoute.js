@@ -18,6 +18,6 @@ orderRouter.post("/status", authAdmin, updateStatus);
 orderRouter.post("/cod", authUser, placeOrderCOD);
 
 //For User
-orderRouter.post("/userorder", authUser, userOrders);
+orderRouter.post("/userorders", authUser, userOrders);
 
 export default orderRouter;

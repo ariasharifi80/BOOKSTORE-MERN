@@ -1,12 +1,40 @@
 import React, { useContext, useEffect, useState } from "react";
 import { ShopContext } from "../../context/ShopContext";
-import { dummyOrders } from "../../assets/data";
+import toast from "react-hot-toast";
+
 const Orders = () => {
-  const { currency } = useContext(ShopContext);
+  const { currency, axios } = useContext(ShopContext);
   const [orders, setOrders] = useState([]);
-  const fetchAllOrders = () => {
-    setOrders(dummyOrders);
+  const fetchAllOrders = async () => {
+    try {
+      const { data } = await axios.post("/api/order/list");
+      if (data.success) {
+        setOrders(data.orders);
+      } else {
+        toast.error(data.error);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
+
+  const statusHandler = async (event, orderId) => {
+    try {
+      const { data } = await axios.post("/api/order/status", {
+        orderId,
+        status: event.target.value,
+      });
+      if (data.success) {
+        fetchAllOrders();
+        toast.success(data.message);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     fetchAllOrders();
     console.log(orders);
@@ -21,21 +49,21 @@ const Orders = () => {
               <div key={index} className="flex gap-x-3">
                 <div className="flexCenter rounded-lg overflow-hidden">
                   <img
-                    src={item.book.image[0]}
+                    src={item.product.image[0]}
                     alt="orderImg"
                     className="max-h-20 max-w-32 aspect-square object-contain"
                   />
                 </div>
                 <div className="w-full block">
                   <h5 className="h5 capitalize line-clamp-1">
-                    {item.book.name}
+                    {item.product.name}
                   </h5>
                   <div className="flex flex-wrap gap-3 max-sm:gap-y-1 mt-1">
                     <div className="flex items-center gap-x-2">
                       <h5 className="medium-14">Price:</h5>
                       <p>
                         {currency}
-                        {item.book.offerPrice}
+                        {item.product.offerPrice}
                       </p>
                     </div>
                     <div className="flex items-center gap-x-2">
@@ -106,6 +134,7 @@ const Orders = () => {
             <div className="flex items-center gap-2">
               <h5 className="medium-14">Status:</h5>
               <select
+                onChange={(event) => statusHandler(event, order._id)}
                 value={order.status}
                 className="text-xs font-semibold p-1 ring-1 ring-slate-900/5 rounded max-w-36 bg-primary"
               >

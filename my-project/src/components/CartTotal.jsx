@@ -21,6 +21,9 @@ const CartTotal = () => {
   const [addresses, setAddresses] = useState([]);
   const [showAddress, setShowAddress] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState(null);
+  const handleZarinpalPayment = () => {
+    toast.error("Zarinpal is currently under maintenance.");
+  };
 
   const getAddress = async () => {
     try {
@@ -42,6 +45,9 @@ const CartTotal = () => {
     try {
       if (!selectedAddress) {
         return toast.error("Please Enter Your Address");
+      }
+      if (method === "zarin") {
+        return handleZarinpalPayment();
       }
       let orderItems = [];
       for (const itemId in cartItems) {

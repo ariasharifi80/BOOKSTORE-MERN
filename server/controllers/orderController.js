@@ -1,5 +1,6 @@
 import Order from "../models/Order.js";
 import Product from "../models/Product.js";
+import User from "../models/User.js";
 
 //Global vars for payment
 
@@ -50,12 +51,13 @@ export const placeOrderCOD = async (req, res) => {
 export const userOrders = async (req, res) => {
   try {
     const userId = req.userId;
-    const order = await Order.find({
+    const orders = await Order.find({
       userId,
       $or: [{ paymentMethod: "COD" }, { isPaid: true }],
     })
       .populate("items.product address")
       .sort({ createdAt: -1 });
+    res.json({ success: true, orders });
   } catch (error) {
     console.log(error.message);
     res.json({ success: true, message: error.message });
@@ -65,11 +67,12 @@ export const userOrders = async (req, res) => {
 // ALL ORDERS DATA FOR ADMIN PANEL
 export const allOrders = async (req, res) => {
   try {
-    const order = await Order.find({
+    const orders = await Order.find({
       $or: [{ paymentMethod: "COD" }, { isPaid: true }],
     })
       .populate("items.product address")
       .sort({ createdAt: -1 });
+    res.json({ success: true, orders });
   } catch (error) {
     console.log(error.message);
     res.json({ success: true, message: error.message });

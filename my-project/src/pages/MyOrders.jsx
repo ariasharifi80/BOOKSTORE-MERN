@@ -1,14 +1,34 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { ShopContext } from "../context/ShopContext";
 import Title from "../components/Title";
-import { dummyOrders } from "../assets/data";
+import toast from "react-hot-toast";
 
 const MyOrders = () => {
-  const { currency, user } = useContext(ShopContext);
+  const { currency, user, axios } = useContext(ShopContext);
+  const [orders, setOrders] = useState([]);
+
+  const loadOrderData = async () => {
+    if (!user) return;
+    try {
+      const { data } = await axios.post("/api/order/userorders");
+      if (data.success) {
+        setOrders(data.orders);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    loadOrderData();
+  }, [user]);
+
   return (
     <div className="max-padd-container py-16 pt-28">
       <Title title1={"My Orders"} title2={"List"} titleStyles={"pb-10"} />
-      {dummyOrders.map((order) => (
+      {orders.map((order) => (
         <div key={order._id} className="bg-primary p-2 mt-3 rounded-lg">
           {/* BOOK LIST */}
           <div className="flex flex-col lg:flex-row gap-4 mb-3">
@@ -16,21 +36,21 @@ const MyOrders = () => {
               <div key={index} className="flex gap-x-3">
                 <div className="flexCenter rounded-lg overflow-hidden">
                   <img
-                    src={item.book.image[0]}
+                    src={item.product.image[0]}
                     alt="orderImg"
                     className="max-h-20 max-w-32 aspect-square object-contain"
                   />
                 </div>
                 <div className="w-full block">
                   <h5 className="h5 capitalize line-clamp-1">
-                    {item.book.name}
+                    {item.product.name}
                   </h5>
                   <div className="flex flex-wrap gap-3 max-sm:gap-y-1 mt-1">
                     <div className="flex items-center gap-x-2">
                       <h5 className="medium-14">Price:</h5>
                       <p>
                         {currency}
-                        {item.book.offerPrice}
+                        {item.product.offerPrice}
                       </p>
                     </div>
                     <div className="flex items-center gap-x-2">
@@ -85,7 +105,10 @@ const MyOrders = () => {
                   <p className="text-gray-400 text-sm">{order.status}</p>
                 </div>
               </div>
-              <button className="btn-secondary !py-1 text-xs rounded-sm">
+              <button
+                onClick={loadOrderData}
+                className="btn-secondary !py-1 text-xs rounded-sm"
+              >
                 Track Order
               </button>
             </div>
