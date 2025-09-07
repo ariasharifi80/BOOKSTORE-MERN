@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { createContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -124,7 +125,7 @@ const ShopContextProvider = ({ children }) => {
   const updateQuantity = async (itemId, quantity) => {
     const cartData = { ...cartItems };
     if (quantity <= 0) {
-      delete cartData[itemId];
+      delete cartData[itemId]; // remove item entirely if quantity is 0 or less
     } else {
       cartData[itemId] = quantity;
     }
