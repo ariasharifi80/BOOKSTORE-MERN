@@ -3,7 +3,9 @@ import mongoose, { mongo } from "mongoose";
 const productSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
+    author: { type: String, required: true }, // ✅ NEW FIELD
     description: { type: String, required: true },
+    summary: { type: String, required: true }, // ✅ NEW FIELD
     price: { type: Number, required: true },
     offerPrice: { type: Number, required: true },
     image: { type: Array, required: true },

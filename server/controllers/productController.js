@@ -5,11 +5,18 @@ import Product from "../models/Product.js";
 
 export const addProduct = async (req, res) => {
   try {
-    const productData = JSON.parse(req.body.productData);
+    const {
+      name,
+      author,
+      description,
+      summary,
+      category,
+      price,
+      offerPrice,
+      popular,
+    } = JSON.parse(req.body.productData);
 
     const images = req.files || [];
-
-    //Upload images to cloudinary or use a default image
 
     let imagesUrl = await Promise.all(
       images.map(async (item) => {
@@ -19,11 +26,20 @@ export const addProduct = async (req, res) => {
         return result.secure_url;
       })
     );
-    console.log(productData);
 
-    await Product.create({ ...productData, image: imagesUrl });
+    await Product.create({
+      name,
+      author,
+      description,
+      summary,
+      category,
+      price,
+      offerPrice,
+      popular,
+      image: imagesUrl,
+    });
 
-    res.json({ success: true, message: "product Added" });
+    res.json({ success: true, message: "Product Added" });
   } catch (error) {
     console.log(error.message);
     res.json({ success: false, message: error.message });
