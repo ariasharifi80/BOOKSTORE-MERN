@@ -1,15 +1,18 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { ShopContext } from "../../context/ShopContext";
 import { FaSquarePlus } from "react-icons/fa6";
 import { FaListAlt } from "react-icons/fa";
 import { MdFactCheck } from "react-icons/md";
-import { Link, NavLink, Outlet } from "react-router-dom";
-import { BiLogOut } from "react-icons/bi";
-
+import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
+import { BiLogOut, BiChevronLeft } from "react-icons/bi";
 import toast from "react-hot-toast";
+import adminImg from "../../assets/user.png";
 
 const Sidebar = () => {
-  const { navigate, axios } = useContext(ShopContext);
+  const { axios } = useContext(ShopContext);
+  const navigate = useNavigate();
+  const [collapsed, setCollapsed] = useState(false);
+
   const navItems = [
     { path: "/admin", label: "Add Item", icon: <FaSquarePlus /> },
     { path: "/admin/list", label: "List", icon: <FaListAlt /> },
@@ -29,47 +32,89 @@ const Sidebar = () => {
       toast.error(error.message);
     }
   };
+
   return (
-    <div className="  max-w-[1440px] flex flex-col sm:flex-row">
+    <div className="max-w-[1440px] flex flex-col sm:flex-row">
       {/* SIDEBAR */}
-      <div className="max-sm:flexCenter max-sm:pb-3 bg-primary pb-3 m-2 sm:min-w-[20%] sm:min-h-[97vh] rounded-xl">
-        <div className="flex flex-col gap-y-6 max-sm:items-center sm:flex-xol pt-4 sm:pt-14">
-          {/* LOGO */}
-          <Link
-            to={"/admin"}
-            className="bold-20 md:bold-24 uppercase font-paci lg:pl-[15%]"
-          >
-            AriaBook <span className="text-secondary bold-28">.</span>
-          </Link>
-          <div className="flex sm:flex-col sm:gap-x-5 gap-y-8 sm:pt-10">
-            {navItems.map((link) => (
-              <NavLink
-                key={link.label}
-                to={link.path}
-                end={link.path === "/admin"}
-                className={({ isActive }) =>
-                  isActive
-                    ? "flexStart gap-x-2 p-5 lg:pl-12 medium-15 cursor-pointer h-10 text-secondary bg-white max-sm:border-b-4 sm:border-r-4 border-secondary "
-                    : "flexStart gap-x-2 lg:pl-12 p-5 medium-15 cursor-pointer h-10 rounded-xl"
-                }
-              >
-                {link.icon}
-                <div className="hidden sm:flex">{link.label}</div>
-              </NavLink>
-            ))}
-            <div className="max-sm:ml-5 sm:mt-48">
-              <button
-                onClick={logout}
-                className="flexStart gap-x-2 lg:pl-12 p-5 medium-15 cursor-pointer h-10 rounded-xl text-red-500"
-              >
-                <BiLogOut />
-                <div className="hidden sm:flex">Logout</div>
-              </button>
-            </div>
+      <div
+        className={`bg-gradient-to-b from-[var(--color-primary)] to-[var(--color-primary-dull)] backdrop-blur-md shadow-lg m-2 rounded-xl transition-all duration-300 
+        ${collapsed ? "sm:w-[80px]" : "sm:w-[250px]"} sm:min-h-[97vh] flex flex-col justify-between`}
+      >
+        <div>
+          {/* Profile + Collapse */}
+          <div className="flex items-center justify-between p-4 border-b border-white/20">
+            {!collapsed && (
+              <div className="flex items-center gap-3">
+                <img
+                  src={adminImg}
+                  alt="Admin"
+                  className="w-10 h-10 rounded-full border-2 border-secondary"
+                />
+                <div>
+                  <p className="font-bold text-gray-800">Admin</p>
+                  <p className="text-xs text-gray-500">Dashboard</p>
+                </div>
+              </div>
+            )}
+            <button
+              onClick={() => setCollapsed(!collapsed)}
+              className={`p-1 rounded-full hover:bg-secondary/20 transition-transform ${
+                collapsed ? "rotate-180" : ""
+              }`}
+            >
+              <BiChevronLeft size={20} />
+            </button>
+          </div>
+
+          {/* Main Nav */}
+          <div className="mt-4">
+            {!collapsed && (
+              <p className="px-5 text-xs text-gray-500 uppercase mb-2">Main</p>
+            )}
+            <nav className="flex flex-col gap-1">
+              {navItems.map((link) => (
+                <NavLink
+                  key={link.label}
+                  to={link.path}
+                  end={link.path === "/admin"}
+                  className={({ isActive }) =>
+                    `flex items-center gap-3 px-5 py-3 rounded-lg transition-all duration-200 relative group
+                    ${
+                      isActive
+                        ? "bg-secondary text-white shadow-md border-l-4 border-tertiary"
+                        : "hover:bg-secondary/10 text-gray-700"
+                    }`
+                  }
+                >
+                  <span className="text-lg">{link.icon}</span>
+                  {!collapsed && <span>{link.label}</span>}
+                  {collapsed && (
+                    <span className="absolute left-full ml-2 px-2 py-1 text-xs bg-gray-800 text-white rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                      {link.label}
+                    </span>
+                  )}
+                </NavLink>
+              ))}
+            </nav>
           </div>
         </div>
+
+        {/* Logout */}
+        <div className="p-4 border-t border-white/20">
+          <button
+            onClick={logout}
+            className="flex items-center gap-3 px-5 py-3 rounded-lg text-red-500 hover:bg-red-500/10 transition-all w-full"
+          >
+            <BiLogOut className="text-lg" />
+            {!collapsed && <span>Logout</span>}
+          </button>
+        </div>
       </div>
-      <Outlet />
+
+      {/* MAIN CONTENT */}
+      <div className="flex-1 p-4">
+        <Outlet />
+      </div>
     </div>
   );
 };

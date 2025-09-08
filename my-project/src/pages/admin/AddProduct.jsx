@@ -1,6 +1,8 @@
 import React, { useContext, useState } from "react";
 import upload_icon from "../../assets/upload_icon.png";
 import { ShopContext } from "../../context/ShopContext";
+import { FaSquarePlus } from "react-icons/fa6";
+
 import toast from "react-hot-toast";
 
 const AddProduct = () => {
