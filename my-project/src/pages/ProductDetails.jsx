@@ -44,8 +44,19 @@ const ProductDetails = () => {
 
   if (!book) return null;
 
+  // Structured details list
+  const details = [
+    { label: "Language", value: book.language },
+    { label: "Pages", value: book.pages || book.pageCount },
+    { label: "Publisher", value: book.publisher },
+    { label: "Publication date", value: book.publicationDate },
+    { label: "ISBN", value: book.isbn || book.isbn13 },
+    { label: "Format", value: book.format },
+    { label: "Dimensions", value: book.dimensions },
+  ].filter((d) => d.value);
+
   return (
-    <div className="max-padd-container py-16 pt-28">
+    <div className="max-padd-container py-16 pt-28 ">
       {/* Breadcrumbs */}
       <p className="text-sm text-gray-500 mb-4">
         <Link to="/">Home</Link> / <Link to="/shop">Shop</Link> /{" "}
@@ -81,13 +92,14 @@ const ProductDetails = () => {
 
         {/* Info Panel */}
         <div className="px-5 py-3 w-full bg-primary rounded-xl pt-8">
-          <h3 className="h3 leading-none">{book.name}</h3>
+          <h3 className="h3 leading-none text-shadow-gray-600">{book.name}</h3>
 
-          {/* Author */}
           {book.author && (
-            <p className="mt-1 text-sm text-gray-300">
+            <p className="mt-1 text-shadow-gray-600 text-sm">
               By{" "}
-              <span className="font-medium text-gray-100">{book.author}</span>
+              <span className="font-medium text-shadow-gray-600">
+                {book.author}
+              </span>
             </p>
           )}
 
@@ -117,28 +129,32 @@ const ProductDetails = () => {
                 );
               })}
             </div>
-            <p className="medium-12 text-gray-300">
+            <p className="medium-12 text-shadow-gray-600">
               {average.toFixed(1)} • {count} reviews
             </p>
           </button>
 
           {/* Price */}
           <div className="h4 flex items-baseline gap-4 my-2">
-            <h3 className="h3 line-through text-secondary">
+            <h3 className="h3 line-through text--gray-300">
               {currency}
               {book.price}.00
             </h3>
-            <h4 className="h4 text-green-700">
+            <h4 className="h4 text-green-400">
               {currency}
               {book.offerPrice}.00
             </h4>
           </div>
 
-          {/* Summary Section */}
+          {/* Summary */}
           {book.summary && (
             <div className="mt-4">
-              <h5 className="font-semibold text-gray-100 mb-1">Summary</h5>
-              <ExpandableText text={book.summary} max={180} />
+              <h5 className="font-semibold text-shadow-gray-600 mb-1">
+                Summary
+              </h5>
+              <p className="max-w-[555px] text-shadow-gray-600">
+                {book.summary}
+              </p>
             </div>
           )}
 
@@ -155,21 +171,51 @@ const ProductDetails = () => {
             </button>
           </div>
 
-          {/* Delivery Info */}
           <div className="flex items-center gap-x-2 mt-3">
-            <FaTruckFast className="text-lg" />
-            <span className="medium-14">Free Delivery on Orders over $100</span>
+            <FaTruckFast className="text-lg text-shadow-gray-600" />
+            <span className="medium-14 text-shadow-gray-600">
+              Free Delivery on Orders over $100
+            </span>
           </div>
 
-          <hr className="my-3 w-2/3" />
+          <hr className="my-3 w-2/3 border-gray-700" />
 
-          {/* Trust Signals */}
-          <div className="mt-2 flex flex-col gap-1 text-gray-30 text-[14px]">
+          <div className="mt-2 flex flex-col gap-1 text-white text-[14px]">
             <p>✅ Authenticity you can Trust</p>
             <p>💵 Enjoy Cash on Delivery</p>
             <p>🔄 Easy Returns Within 7 Days</p>
           </div>
         </div>
+      </div>
+
+      {/* Description Section */}
+      <div className="mt-8 bg-primary p-6 rounded-lg shadow-md">
+        {details.length > 0 && (
+          <div>
+            <h5 className="text-xl font-semibold mb-4 text-gray-900">
+              Book Details
+            </h5>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2">
+              {details.map((d) => (
+                <div key={d.label} className="flex items-start gap-2">
+                  <span className="w-32 font-medium text-gray-800">
+                    {d.label}:
+                  </span>
+                  <span className="text-gray-700">{d.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {book.description && (
+          <div className="mt-6">
+            <h5 className="text-2xl font-semibold mb-2 text-gray-900">
+              Description
+            </h5>
+            <ExpandableText text={book.description} max={300} />
+          </div>
+        )}
       </div>
 
       {/* Features */}
@@ -186,19 +232,19 @@ const ProductDetails = () => {
   );
 };
 
-// Expandable text helper
+// ExpandableText helper
 const ExpandableText = ({ text, max = 150 }) => {
   const [open, setOpen] = useState(false);
   const isLong = text.length > max;
   const display = open || !isLong ? text : `${text.slice(0, max)}...`;
 
   return (
-    <p className="max-w-[555px]">
+    <p className="max-w-[555px] text-gray-800">
       {display}
       {isLong && (
         <span
           onClick={() => setOpen((s) => !s)}
-          className="text-secondary cursor-pointer ml-2 hover:underline"
+          className="text-blue-600 cursor-pointer ml-2 hover:underline"
         >
           {open ? "Show Less" : "Read More"}
         </span>
@@ -207,7 +253,7 @@ const ExpandableText = ({ text, max = 150 }) => {
   );
 };
 
-// Rating hook (unchanged)
+// Rating hook
 function useAverageRating(bookId, book) {
   const [stats, setStats] = useState({ average: 4.5, count: 22 });
 

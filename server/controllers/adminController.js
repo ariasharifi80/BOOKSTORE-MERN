@@ -1,13 +1,15 @@
+// controllers/adminController.js
 import jwt from "jsonwebtoken";
+import User from "../models/User.js";
+import Ticket from "../models/Ticket.js";
 
 const cookieOptions = {
-  httpOnly: true, // Prevent client-side javascript from accessing the cookie
-  secure: process.env.APP_ENV === "production", //Ensure the cookies is only sent over HTTPS in production
-  sameSite: process.env.APP_ENV === "production" ? "none" : "strict", // Controls when cookies are sent "none" allows cross-site in production, "strict" block cross-site by default
+  httpOnly: true,
+  secure: process.env.APP_ENV === "production",
+  sameSite: process.env.APP_ENV === "production" ? "none" : "strict",
 };
 
-// Admin Login Route
-
+// Admin Login
 export const adminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -21,42 +23,110 @@ export const adminLogin = async (req, res) => {
 
       res.cookie("adminToken", token, {
         ...cookieOptions,
-        maxAge: 7 * 24 * 60 * 60 * 1000, // Cookie expiration time
+        maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
-      return res.json({
-        success: true,
-        message: "Admin logged in",
-      });
-    } else {
-      return res.json({ success: false, message: "Invalid Credentials" });
+      return res.json({ success: true, message: "Admin logged in" });
     }
+    return res.json({ success: false, message: "Invalid Credentials" });
   } catch (error) {
-    console.log(error);
-    res.json({ success: false, message: error.message });
+    console.error(error);
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// CHECK AUTH
-
+// Check admin auth (middleware hit-test)
 export const isAdminAuth = async (req, res) => {
   try {
     return res.json({ success: true });
   } catch (error) {
-    console.log(error.message);
-    res.json({ success: false, message: error.message });
+    console.error(error);
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
-//LOGOUT ADMIN
+// Logout
 export const adminLogout = async (req, res) => {
-  console.log("Logout route hit");
-  console.log("Session data:", req.session);
   try {
     res.clearCookie("adminToken", cookieOptions);
     return res.json({ success: true, message: "Admin Logged Out" });
   } catch (error) {
-    console.log(error.message);
-    res.json({ success: false, message: error.message });
+    console.error(error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/* ─── User & Ticket Management ────────────────────────────────────────── */
+
+// GET /api/admin/users
+export const listUsers = async (req, res) => {
+  try {
+    const users = await User.find({})
+      .select("_id name email createdAt")
+      .sort("-createdAt");
+    return res.json({ success: true, users });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// DELETE /api/admin/users/:userId
+export const deleteUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    await User.findByIdAndDelete(userId);
+    // remove all tickets by that user
+    await Ticket.deleteMany({ user: userId });
+    return res.json({
+      success: true,
+      message: "User and their tickets removed",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// GET /api/admin/users/:userId/tickets
+export const listUserTickets = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const tickets = await Ticket.find({ user: userId }).sort("-createdAt");
+    return res.json({ success: true, tickets });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// PATCH /api/admin/tickets/:ticketId
+// body: { status: "open"|"closed" }
+export const updateTicketStatus = async (req, res) => {
+  try {
+    const { ticketId } = req.params;
+    const { status } = req.body;
+    if (!["open", "closed"].includes(status)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid status value" });
+    }
+    await Ticket.findByIdAndUpdate(ticketId, { status });
+    return res.json({ success: true, message: "Ticket status updated" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// DELETE /api/admin/tickets/:ticketId
+export const deleteTicket = async (req, res) => {
+  try {
+    const { ticketId } = req.params;
+    await Ticket.findByIdAndDelete(ticketId);
+    return res.json({ success: true, message: "Ticket deleted" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: error.message });
   }
 };

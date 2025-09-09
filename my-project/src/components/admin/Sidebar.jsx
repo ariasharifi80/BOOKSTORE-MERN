@@ -1,9 +1,10 @@
+// src/components/admin/Sidebar.jsx
 import React, { useContext, useState } from "react";
 import { ShopContext } from "../../context/ShopContext";
 import { FaSquarePlus } from "react-icons/fa6";
-import { FaListAlt } from "react-icons/fa";
+import { FaListAlt, FaUsers } from "react-icons/fa";
 import { MdFactCheck } from "react-icons/md";
-import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { BiLogOut, BiChevronLeft } from "react-icons/bi";
 import toast from "react-hot-toast";
 import adminImg from "../../assets/user.png";
@@ -17,6 +18,7 @@ const Sidebar = () => {
     { path: "/admin", label: "Add Item", icon: <FaSquarePlus /> },
     { path: "/admin/list", label: "List", icon: <FaListAlt /> },
     { path: "/admin/orders", label: "Orders", icon: <MdFactCheck /> },
+    { path: "/admin/users", label: "Users", icon: <FaUsers /> },
   ];
 
   const logout = async () => {
@@ -41,7 +43,7 @@ const Sidebar = () => {
         ${collapsed ? "sm:w-[80px]" : "sm:w-[250px]"} sm:min-h-[97vh] flex flex-col justify-between`}
       >
         <div>
-          {/* Profile + Collapse */}
+          {/* Profile & Collapse Button */}
           <div className="flex items-center justify-between p-4 border-b border-white/20">
             {!collapsed && (
               <div className="flex items-center gap-3">
@@ -66,7 +68,7 @@ const Sidebar = () => {
             </button>
           </div>
 
-          {/* Main Nav */}
+          {/* Navigation Items */}
           <div className="mt-4">
             {!collapsed && (
               <p className="px-5 text-xs text-gray-500 uppercase mb-2">Main</p>
@@ -99,7 +101,7 @@ const Sidebar = () => {
           </div>
         </div>
 
-        {/* Logout */}
+        {/* Logout Button */}
         <div className="p-4 border-t border-white/20">
           <button
             onClick={logout}
