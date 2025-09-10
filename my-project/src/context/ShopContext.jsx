@@ -26,7 +26,8 @@ const ShopContextProvider = ({ children }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [userFavorites, setUserFavorites] = useState([]);
   const [userTickets, setUserTickets] = useState([]);
-  const [userOrders, setUserOrders] = useState([]);
+
+  const [orders, setOrders] = useState([]);
 
   // ── ADMIN STATE ────────────────────────────────────────────────────────
   const [adminUsers, setAdminUsers] = useState([]);
@@ -121,7 +122,7 @@ const ShopContextProvider = ({ children }) => {
   };
 
   const getCartAmount = () => {
-    Object.entries(cartItems).reduce((sum, [id, qty]) => {
+    return Object.entries(cartItems).reduce((sum, [id, qty]) => {
       const book = books.find((b) => b._id === id);
       return book ? sum + book.offerPrice * qty : sum;
     }, 0);
@@ -129,9 +130,9 @@ const ShopContextProvider = ({ children }) => {
 
   const fetchUserOrders = async () => {
     try {
-      const { data } = await axios.get("/api/order/userorders");
+      const { data } = await axios.post("/api/order/userorders");
       if (data.success) {
-        setUserOrders(data.orders);
+        setOrders(data.orders);
       } else {
         toast.error(data.message);
       }
@@ -277,6 +278,7 @@ const ShopContextProvider = ({ children }) => {
   const fetchUserFavorites = async () => {
     try {
       const { data } = await axios.get("/api/user/favorites");
+
       if (data.success) {
         setUserFavorites(data.favorites);
       } else {
@@ -286,22 +288,22 @@ const ShopContextProvider = ({ children }) => {
       toast.error(error.message);
     }
   };
-
   const toggleFavorite = async (bookId) => {
+    console.log("🔁 toggleFavorite → trying to toggle", bookId);
     try {
       const { data } = await axios.post(`/api/user/favorites/${bookId}`);
+      console.log("🔁 toggleFavorite → server returned:", data.favorites);
       if (data.success) {
         setUserFavorites(data.favorites);
-        toast.success("Added to the Favorites");
+        toast.success("Toggled favorite!");
       } else {
         toast.error(data.message);
       }
     } catch (error) {
-      console.log(error);
+      console.error("toggleFavorite error:", error);
       toast.error(error.message);
     }
   };
-
   //TICKET SECTIONS
 
   const fetchUserTickets = async () => {
@@ -320,7 +322,7 @@ const ShopContextProvider = ({ children }) => {
 
   const submitTicket = async ({ subject, message }) => {
     try {
-      const { data } = await axios.post("/api/user/tickets", {
+      const { data } = await axios.post("/api/user/ticket", {
         subject,
         message,
       });
@@ -371,10 +373,12 @@ const ShopContextProvider = ({ children }) => {
     userFavorites,
     fetchUserFavorites,
     toggleFavorite,
-
+    fetchUserOrders,
     userTickets,
     fetchUserTickets,
     submitTicket,
+    orders,
+    setOrders,
     // axios now exposed
     axios,
     // admin exports

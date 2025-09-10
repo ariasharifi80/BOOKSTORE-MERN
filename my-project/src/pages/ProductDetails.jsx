@@ -1,25 +1,56 @@
+// src/pages/ProductDetails.jsx
+
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { ShopContext } from "../context/ShopContext";
 import { Link, useParams } from "react-router-dom";
 import {
   TbHeart,
+  TbHeartFilled,
   TbShoppingBagPlus,
   TbStarFilled,
   TbStar,
 } from "react-icons/tb";
 import { FaTruckFast } from "react-icons/fa6";
+import toast from "react-hot-toast";
+
 import ProductFeatures from "../components/ProductFeatures";
 import RelatedBooks from "../components/RelatedBooks";
 import ProductReviews from "../components/ProductReviews";
 
+// ── Component ───────────────────────────────────────────────────
 const ProductDetails = () => {
-  const { books, currency, addToCart, cartItems } = useContext(ShopContext);
+  // 1. Context + Router hooks
+  const {
+    navigate,
+    books,
+    currency,
+    addToCart,
+    cartItems,
+    user,
+    userFavorites, // ← plural
+    fetchUserFavorites, // ← plural
+    toggleFavorite,
+  } = useContext(ShopContext);
+
+  // 2. URL param + find the right book
   const { id } = useParams();
   const book = books.find((b) => b._id === id);
-  const [image, setImage] = useState(null);
 
+  // 3. Local state + refs
+  const [image, setImage] = useState(null);
+  const [hoverStar, setHoverStar] = useState(0);
   const featuresRef = useRef(null);
   const reviewsRef = useRef(null);
+
+  // 4. Custom hook for average rating
+  const { average, count } = useAverageRating(id, book);
+
+  // 5. Always-run effects
+  useEffect(() => {
+    if (user) {
+      fetchUserFavorites();
+    }
+  }, [user, fetchUserFavorites]);
 
   useEffect(() => {
     if (book?.image?.length) {
@@ -28,23 +59,27 @@ const ProductDetails = () => {
   }, [book]);
 
   useEffect(() => {
-    console.log(cartItems);
+    console.log("Cart Items:", cartItems);
   }, [cartItems]);
 
-  const handleJumpToFeatures = () => {
+  // 6. If book is not loaded yet, return early (but *after* all hooks above)
+  if (!book) {
+    return (
+      <div className="max-padd-container py-16 pt-28">
+        <p className="text-center text-gray-500">Loading book details…</p>
+      </div>
+    );
+  }
+  // 7. Computed helpers & scroll handlers
+  const isFav = Array.isArray(userFavorites)
+    ? userFavorites.some((fav) => fav._id === book._id)
+    : false;
+  const jumpToFeatures = () =>
     featuresRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
-  const handleJumpToReviews = () => {
+  const jumpToReviews = () =>
     reviewsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
 
-  const { average, count } = useAverageRating(id, book);
-  const [hoverStar, setHoverStar] = useState(0);
-
-  if (!book) return null;
-
-  // Structured details list
+  // 8. Book details array
   const details = [
     { label: "Language", value: book.language },
     { label: "Pages", value: book.pages || book.pageCount },
@@ -55,8 +90,17 @@ const ProductDetails = () => {
     { label: "Dimensions", value: book.dimensions },
   ].filter((d) => d.value);
 
+  // console.log("favorites from context:", userFavorites);
+  // console.log(
+  //   "book._id:",
+  //   book._id,
+  //   "includes? →",
+  //   userFavorites.includes(book._id),
+  // );
+
+  // 9. Return the full layout
   return (
-    <div className="max-padd-container py-16 pt-28 ">
+    <div className="max-padd-container py-16 pt-28">
       {/* Breadcrumbs */}
       <p className="text-sm text-gray-500 mb-4">
         <Link to="/">Home</Link> / <Link to="/shop">Shop</Link> /{" "}
@@ -64,16 +108,16 @@ const ProductDetails = () => {
         <span className="font-semibold">{book.name}</span>
       </p>
 
-      {/* Main Content */}
-      <div className="flex gap-10 flex-col xl:flex-row my-6">
-        {/* Image Gallery */}
+      {/* Main content */}
+      <div className="flex flex-col xl:flex-row gap-10 my-6">
+        {/* Image gallery */}
         <div className="flex gap-x-2 max-w-[433px] rounded-xl">
           <div className="flex-1 flexCenter flex-col gap-2 flex-wrap">
             {book.image.map((img, idx) => (
               <img
                 key={idx}
-                onClick={() => setImage(img)}
                 src={img}
+                onClick={() => setImage(img)}
                 alt={`${book.name} thumbnail ${idx + 1}`}
                 className={`rounded-lg cursor-pointer border-2 transition-all duration-200 ${
                   image === img ? "border-secondary" : "border-transparent"
@@ -90,10 +134,9 @@ const ProductDetails = () => {
           </div>
         </div>
 
-        {/* Info Panel */}
+        {/* Info panel */}
         <div className="px-5 py-3 w-full bg-primary rounded-xl pt-8">
           <h3 className="h3 leading-none text-shadow-gray-600">{book.name}</h3>
-
           {book.author && (
             <p className="mt-1 text-shadow-gray-600 text-sm">
               By{" "}
@@ -105,7 +148,7 @@ const ProductDetails = () => {
 
           {/* Ratings */}
           <button
-            onClick={handleJumpToReviews}
+            onClick={jumpToReviews}
             className="flex items-center gap-x-2 pt-2 group"
           >
             <div className="flex gap-x-1 text-yellow-400">
@@ -158,7 +201,7 @@ const ProductDetails = () => {
             </div>
           )}
 
-          {/* Action Buttons */}
+          {/* Action buttons */}
           <div className="flex items-center gap-x-4 mt-6">
             <button
               onClick={() => addToCart(book._id)}
@@ -166,8 +209,22 @@ const ProductDetails = () => {
             >
               Add to Cart <TbShoppingBagPlus />
             </button>
-            <button className="btn-secondary !rounded-md">
-              <TbHeart className="text-xl" />
+            <button
+              onClick={() => {
+                if (!user) {
+                  toast.error("Please log in to manage favorites.");
+                  navigate("/login");
+                  return;
+                }
+                toggleFavorite(book._id);
+              }}
+              className="btn-secondary !rounded-md"
+            >
+              {isFav ? (
+                <TbHeartFilled className="text-xl text-red-500" />
+              ) : (
+                <TbHeart className="text-xl" />
+              )}
             </button>
           </div>
 
@@ -179,7 +236,6 @@ const ProductDetails = () => {
           </div>
 
           <hr className="my-3 w-2/3 border-gray-700" />
-
           <div className="mt-2 flex flex-col gap-1 text-white text-[14px]">
             <p>✅ Authenticity you can Trust</p>
             <p>💵 Enjoy Cash on Delivery</p>
@@ -187,11 +243,10 @@ const ProductDetails = () => {
           </div>
         </div>
       </div>
-
       {/* Description Section */}
       <div className="mt-8 bg-primary p-6 rounded-lg shadow-md">
         {details.length > 0 && (
-          <div>
+          <>
             <h5 className="text-xl font-semibold mb-4 text-gray-900">
               Book Details
             </h5>
@@ -205,7 +260,7 @@ const ProductDetails = () => {
                 </div>
               ))}
             </div>
-          </div>
+          </>
         )}
 
         {book.description && (
@@ -218,21 +273,17 @@ const ProductDetails = () => {
         )}
       </div>
 
-      {/* Features */}
+      {/* Features, Reviews & Related */}
       <ProductFeatures innerRef={featuresRef} />
-
-      {/* Reviews */}
       <div ref={reviewsRef}>
         <ProductReviews bookId={id} bookTitle={book.name} />
       </div>
-
-      {/* Related Books */}
       <RelatedBooks book={book} id={id} />
     </div>
   );
 };
 
-// ExpandableText helper
+// ─── ExpandableText helper ───────────────────────────────────────
 const ExpandableText = ({ text, max = 150 }) => {
   const [open, setOpen] = useState(false);
   const isLong = text.length > max;
@@ -253,24 +304,24 @@ const ExpandableText = ({ text, max = 150 }) => {
   );
 };
 
-// Rating hook
+// ─── Hook: useAverageRating ──────────────────────────────────────
 function useAverageRating(bookId, book) {
-  const [stats, setStats] = useState({ average: 4.5, count: 22 });
+  const [stats, setStats] = useState({ average: 4.5, count: 0 });
 
   useEffect(() => {
     const local = getStoredReviews(bookId);
     const back = Array.isArray(book?.reviews) ? book.reviews : [];
+
     const localCount = local.length;
     const backCount = back.length;
-    const totalCount = localCount + backCount || 22;
-    const localAvg =
-      localCount > 0
-        ? local.reduce((sum, r) => sum + r.rating, 0) / localCount
-        : 0;
-    const backAvg =
-      backCount > 0
-        ? back.reduce((sum, r) => sum + (r.rating || 0), 0) / backCount
-        : 0;
+    const totalCount = localCount + backCount;
+    const localAvg = localCount
+      ? local.reduce((sum, r) => sum + r.rating, 0) / localCount
+      : 0;
+    const backAvg = backCount
+      ? back.reduce((sum, r) => sum + (r.rating || 0), 0) / backCount
+      : 0;
+
     const avg =
       totalCount > 0
         ? (localAvg * localCount + backAvg * backCount) / totalCount
@@ -282,6 +333,7 @@ function useAverageRating(bookId, book) {
   return stats;
 }
 
+// ─── Helper: getStoredReviews ───────────────────────────────────
 function getStoredReviews(bookId) {
   try {
     const raw = localStorage.getItem(`reviews:${bookId}`);

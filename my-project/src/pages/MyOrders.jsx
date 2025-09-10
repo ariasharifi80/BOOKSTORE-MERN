@@ -1,11 +1,11 @@
+/* eslint-disable no-unused-vars */
 import React, { useContext, useEffect, useState } from "react";
 import { ShopContext } from "../context/ShopContext";
 import Title from "../components/Title";
 import toast from "react-hot-toast";
 
 const MyOrders = () => {
-  const { currency, user, axios } = useContext(ShopContext);
-  const [orders, setOrders] = useState([]);
+  const { currency, user, axios, orders, setOrders } = useContext(ShopContext);
 
   const loadOrderData = async () => {
     if (!user) return;
@@ -25,9 +25,18 @@ const MyOrders = () => {
     loadOrderData();
   }, [user]);
 
+  if (!orders || orders.length === 0) {
+    return (
+      <div className="max-padd-container pb-16 pt-12">
+        <Title title1="My Orders " title2="List" titleStyles="pb-10" />
+        <p className="text-gray-500">You have no orders yet.</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="max-padd-container py-16 pt-28">
-      <Title title1={"My Orders"} title2={"List"} titleStyles={"pb-10"} />
+    <div className="max-padd-container pb-16 pt-16">
+      <Title title1={"My Orders "} title2={"List"} titleStyles={"pb-10"} />
       {orders.map((order) => (
         <div key={order._id} className="bg-primary p-2 mt-3 rounded-lg">
           {/* BOOK LIST */}

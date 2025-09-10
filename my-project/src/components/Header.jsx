@@ -34,8 +34,12 @@ const Header = () => {
     }
   }, [searchQuery]);
 
+  /* - <header className="absolute top-0 left-0 right-0 max-padd-container flexBetween gap-4 py-2">
++ <header className="w-full bg-white shadow max-padd-container flexBetween gap-4 py-4">
+*/
+
   return (
-    <header className="absolute top-0 left-0 right-0 max-padd-container flexBetween gap-4 py-2">
+    <header className="w-full bg-white shadow max-padd-container flexBetween gap-4 py-4 border-radius">
       {/* {LOGO} */}
       <div className="flex flex-1">
         <Link to={"/"} className="bold-22 xl:bold-28 flex item-end gap-1">

@@ -24,7 +24,7 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="max-padd-container bg-gradient-to-l from-primary via-white to-primary">
+    <footer className="max-padd-container bg-gradient-to-l from-primary via-white to-primary mt-12 lg:mt-16">
       <div className="flex flex-col md:flex-row items-start justify-between gap-10 py-10 border-b border-gray-500/30">
         <div>
           {/* LOGO */}

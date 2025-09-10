@@ -86,6 +86,12 @@ const CartTotal = () => {
     }
   }, [user]);
 
+  const rawAmount = Number(getCartAmount()) || 0;
+  const shippingFee = rawAmount === 0 ? 0 : Number(delivery_charges) || 0;
+  const taxRate = 0.05; // 5%
+  const tax = rawAmount * taxRate;
+  const totalAmt = rawAmount + shippingFee + tax;
+
   return (
     <div>
       <h3 className="bold-22">
