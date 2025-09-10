@@ -21,6 +21,7 @@ import AdminLogin from "./components/admin/AdminLogin";
 import AddProduct from "./pages/admin/AddProduct";
 import ProductList from "./pages/admin/ProductList";
 import Orders from "./pages/admin/Orders";
+import AccountPanel from "./pages/AccountPanel";
 import AdminUsers from "./pages/admin/AdminUsers"; // ← import your AdminUsers page
 
 import Header from "./components/Header";
@@ -52,6 +53,7 @@ const App = () => {
         <Route path="/cart" element={<Cart />} />
         <Route path="/address-form" element={<AddressForm />} />
         <Route path="/my-orders" element={<MyOrders />} />
+        <Route path="/account" element={<AccountPanel />} />
         <Route path="/loader" element={<Loading />} />
 
         {/* Admin routes */}

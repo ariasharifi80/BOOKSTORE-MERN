@@ -24,6 +24,9 @@ const ShopContextProvider = ({ children }) => {
   const [showUserLogin, setShowUserLogin] = useState(false);
   const delivery_charges = 10;
   const [isAdmin, setIsAdmin] = useState(false);
+  const [userFavorites, setUserFavorites] = useState([]);
+  const [userTickets, setUserTickets] = useState([]);
+  const [userOrders, setUserOrders] = useState([]);
 
   // ── ADMIN STATE ────────────────────────────────────────────────────────
   const [adminUsers, setAdminUsers] = useState([]);
@@ -117,11 +120,25 @@ const ShopContextProvider = ({ children }) => {
     }
   };
 
-  const getCartAmount = () =>
+  const getCartAmount = () => {
     Object.entries(cartItems).reduce((sum, [id, qty]) => {
       const book = books.find((b) => b._id === id);
       return book ? sum + book.offerPrice * qty : sum;
     }, 0);
+  };
+
+  const fetchUserOrders = async () => {
+    try {
+      const { data } = await axios.get("/api/order/userorders");
+      if (data.success) {
+        setUserOrders(data.orders);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
 
   // ── ADMIN HELPERS ───────────────────────────────────────────────────────
 
@@ -256,6 +273,67 @@ const ShopContextProvider = ({ children }) => {
     a.click();
     URL.revokeObjectURL(url);
   };
+  //FAVORITE SECTION
+  const fetchUserFavorites = async () => {
+    try {
+      const { data } = await axios.get("/api/user/favorites");
+      if (data.success) {
+        setUserFavorites(data.favorites);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  const toggleFavorite = async (bookId) => {
+    try {
+      const { data } = await axios.post(`/api/user/favorites/${bookId}`);
+      if (data.success) {
+        setUserFavorites(data.favorites);
+        toast.success("Added to the Favorites");
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.message);
+    }
+  };
+
+  //TICKET SECTIONS
+
+  const fetchUserTickets = async () => {
+    try {
+      const { data } = await axios.get("/api/user/tickets");
+
+      if (data.success) {
+        setUserTickets(data.tickets);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  const submitTicket = async ({ subject, message }) => {
+    try {
+      const { data } = await axios.post("/api/user/tickets", {
+        subject,
+        message,
+      });
+      if (data.success) {
+        setUserTickets((prev) => [data.ticket, ...prev]);
+        toast.success("Ticket submitted");
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
 
   // ── INITIAL LOAD ────────────────────────────────────────────────────────
   useEffect(() => {
@@ -290,6 +368,13 @@ const ShopContextProvider = ({ children }) => {
     setIsAdmin,
     fetchBooks,
     logoutUser,
+    userFavorites,
+    fetchUserFavorites,
+    toggleFavorite,
+
+    userTickets,
+    fetchUserTickets,
+    submitTicket,
     // axios now exposed
     axios,
     // admin exports

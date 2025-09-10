@@ -120,6 +120,13 @@ const Header = () => {
           {user && (
             <ul className="bg-white p-2 w-32 ring-1 ring-slate-900/5 rounded absolute right-0 top-10 hidden group-hover:flex flex-col medium-14 shadow-md z-50">
               <li
+                onClick={() => navigate("/account")}
+                className="p-2 rounded-md hover:bg-primary cursor-pointer"
+              >
+                Account
+              </li>
+
+              <li
                 onClick={() => navigate("/my-orders")}
                 className="p-2 rounded-md hover:bg-primary cursor-pointer"
               >
