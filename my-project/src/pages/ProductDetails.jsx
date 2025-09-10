@@ -50,7 +50,7 @@ const ProductDetails = () => {
     if (user) {
       fetchUserFavorites();
     }
-  }, [user, fetchUserFavorites]);
+  }, [user]);
 
   useEffect(() => {
     if (book?.image?.length) {
@@ -218,12 +218,12 @@ const ProductDetails = () => {
                 }
                 toggleFavorite(book._id);
               }}
-              className="btn-secondary !rounded-md"
+              className={`btn-secondary !rounded-md transition-transform duration-150 active:scale-110`}
             >
               {isFav ? (
-                <TbHeartFilled className="text-xl text-red-500" />
+                <TbHeartFilled className="text-xl text-red-500 transition-colors duration-200" />
               ) : (
-                <TbHeart className="text-xl" />
+                <TbHeart className="text-xl transition-colors duration-200" />
               )}
             </button>
           </div>

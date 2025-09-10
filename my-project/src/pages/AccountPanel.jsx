@@ -87,7 +87,7 @@ export default function AccountPanel() {
         </aside>
 
         {/* Main Content */}
-        <div className="flex-1 bg-white rounded-lg shadow p-6">
+        <div className="flex-1 bg-white rounded-lg shadow p-6 transition-opacity duration-300 opacity-100">
           {tab === 0 && (
             <form onSubmit={handleProfileSave} className="space-y-4">
               <div>

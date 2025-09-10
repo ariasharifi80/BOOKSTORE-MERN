@@ -278,6 +278,7 @@ const ShopContextProvider = ({ children }) => {
   const fetchUserFavorites = async () => {
     try {
       const { data } = await axios.get("/api/user/favorites");
+      console.log("🔎 GET favorites →", data.favorites);
 
       if (data.success) {
         setUserFavorites(data.favorites);
@@ -289,18 +290,21 @@ const ShopContextProvider = ({ children }) => {
     }
   };
   const toggleFavorite = async (bookId) => {
-    console.log("🔁 toggleFavorite → trying to toggle", bookId);
     try {
       const { data } = await axios.post(`/api/user/favorites/${bookId}`);
-      console.log("🔁 toggleFavorite → server returned:", data.favorites);
       if (data.success) {
+        // Determine if it was added or removed
+        const wasAdded = data.favorites.some((fav) => fav._id === bookId);
         setUserFavorites(data.favorites);
-        toast.success("Toggled favorite!");
+
+        toast.success(
+          wasAdded ? "❤️ Added to favorites" : "💔 Removed from favorites",
+          { autoClose: 1500 },
+        );
       } else {
         toast.error(data.message);
       }
     } catch (error) {
-      console.error("toggleFavorite error:", error);
       toast.error(error.message);
     }
   };

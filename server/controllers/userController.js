@@ -121,21 +121,36 @@ export const logout = async (req, res) => {
 // GETTING USER FAVORITE BOOKS
 export const getFavorites = async (req, res) => {
   try {
+    console.log("🛠 getFavorites → incoming userId:", req.userId);
     const user = await User.findById(req.userId).populate("favorites");
+    console.log("🛠 getFavorites → user.favorites from DB:", user?.favorites);
     return res.json({ success: true, favorites: user.favorites });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, message: "Server error" });
+    console.error("getFavorites error:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
 //TOGGLE ADD/REMOVE FAVORITE
+// TOGGLE ADD/REMOVE FAVORITE
 export const toggleFavorite = async (req, res) => {
   try {
     const { bookId } = req.params;
-    const user = await User.findById(req.userId);
-    const idx = user.favorites.indexOf(bookId);
+    console.log(
+      "🛠 toggleFavorite → incoming userId:",
+      req.userId,
+      "bookId:",
+      bookId
+    );
 
+    const user = await User.findById(req.userId);
+    console.log(
+      "🛠 toggleFavorite → before toggle user.favorites:",
+      user.favorites
+    );
+
+    const idx = user.favorites.indexOf(bookId);
     if (idx === -1) {
       user.favorites.push(bookId);
     } else {
@@ -143,11 +158,18 @@ export const toggleFavorite = async (req, res) => {
     }
 
     await user.save();
+    console.log(
+      "🛠 toggleFavorite → after save user.favorites:",
+      user.favorites
+    );
+
     const updated = await User.findById(req.userId).populate("favorites");
+    console.log("🛠 toggleFavorite → populated favorites:", updated.favorites);
+
     return res.json({ success: true, favorites: updated.favorites });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: "Server error" });
+    console.error("toggleFavorite error:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
