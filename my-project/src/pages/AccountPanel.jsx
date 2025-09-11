@@ -2,6 +2,7 @@
 import React, { useContext, useState, useEffect } from "react";
 import { ShopContext } from "../context/ShopContext";
 import MyOrders from "./MyOrders";
+import toast from "react-hot-toast";
 
 export default function AccountPanel() {
   const {
@@ -39,16 +40,34 @@ export default function AccountPanel() {
     if (tab === 4) fetchUserTickets();
   }, [tab]);
 
-  const handleProfileSave = (e) => {
+  const handleProfileSave = async (e) => {
     e.preventDefault();
-    updateProfile({ name, email });
+    try {
+      const res = await updateProfile({ name, email });
+      if (res.success) {
+        toast.success("Profile Updated");
+      } else {
+        toast.error(res.message);
+      }
+    } catch (error) {
+      toast.error(error.message || "Update Failed");
+    }
   };
 
-  const handleChangePassword = (e) => {
+  const handleChangePassword = async (e) => {
     e.preventDefault();
-    changePassword(currentPassword, newPassword);
-    setCurrentPassword("");
-    setNewPassword("");
+    try {
+      const res = await changePassword({ currentPassword, newPassword });
+      if (res.success) {
+        toast.success("Password changed");
+        setCurrentPassword("");
+        setNewPassword("");
+      } else {
+        toast.error(res.message);
+      }
+    } catch (error) {
+      toast.error(error.message || "Change Password failed");
+    }
   };
 
   const handleFavoriteToggle = (id) => toggleFavorite(id);

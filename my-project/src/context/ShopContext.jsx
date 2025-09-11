@@ -341,6 +341,42 @@ const ShopContextProvider = ({ children }) => {
     }
   };
 
+  const updateProfile = async ({ name, email }) => {
+    try {
+      const { data } = await axios.put("/api/user/update", { name, email });
+      if (data.success) {
+        toast.success("Profile Updated");
+        setUser(data.user);
+      } else {
+        toast.error(data.message);
+      }
+      return data;
+    } catch (err) {
+      const error = err.response?.data || { message: err.message };
+      toast.error(error.message);
+      throw error;
+    }
+  };
+
+  const changePassword = async ({ currentPassword, newPassword }) => {
+    try {
+      const { data } = await axios.put("/api/user/change-password", {
+        currentPassword,
+        newPassword,
+      });
+      if (data.success) {
+        toast.success(data.message);
+      } else {
+        toast.error(data.message);
+      }
+      return data; // { success, message }
+    } catch (err) {
+      const error = err.response?.data || { message: err.message };
+      toast.error(error.message);
+      throw error;
+    }
+  };
+
   // ── INITIAL LOAD ────────────────────────────────────────────────────────
   useEffect(() => {
     fetchBooks();
@@ -383,6 +419,8 @@ const ShopContextProvider = ({ children }) => {
     submitTicket,
     orders,
     setOrders,
+    updateProfile,
+    changePassword,
     // axios now exposed
     axios,
     // admin exports

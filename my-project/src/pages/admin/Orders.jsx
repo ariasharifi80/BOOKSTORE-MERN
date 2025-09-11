@@ -35,6 +35,23 @@ const Orders = () => {
     }
   };
 
+  const handleDelete = async (orderId) => {
+    if (!window.confirm("DO You want to delete this order permanently?"))
+      return;
+
+    try {
+      const { data } = await axios.delete(`/api/order/${orderId}`);
+      if (data.success) {
+        fetchAllOrders();
+        toast.success(data.message);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
   useEffect(() => {
     fetchAllOrders();
     console.log(orders);
@@ -152,6 +169,13 @@ const Orders = () => {
                 <option value="Out For Delivery">Out For Delivery</option>
                 <option value="Delivered">Delivered</option>
               </select>
+
+              <button
+                onClick={() => handleDelete(order._id)}
+                className="text-white bg-red-500 hover:bg-red-600 px-2 py-1 rounded text-xs"
+              >
+                Delete
+              </button>
             </div>
           </div>
         </div>

@@ -93,3 +93,15 @@ export const updateStatus = async (req, res) => {
     res.json({ success: true, message: error.message });
   }
 };
+
+//DELETE ORDER FOR ADMIN
+export const deleteOrder = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await Order.findByIdAndDelete(id);
+    return res.json({ success: true, message: "Order Deleted" });
+  } catch (error) {
+    console.error("deleteOrder error:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};

@@ -5,6 +5,7 @@ import {
   placeOrderCOD,
   updateStatus,
   userOrders,
+  deleteOrder,
 } from "../controllers/orderController.js";
 import authUser from "../middlewares/authUser.js";
 
@@ -13,6 +14,7 @@ const orderRouter = express.Router();
 //For Admin
 orderRouter.post("/list", authAdmin, allOrders);
 orderRouter.post("/status", authAdmin, updateStatus);
+orderRouter.delete("/:id", authAdmin, deleteOrder);
 
 //For Payment
 orderRouter.post("/cod", authUser, placeOrderCOD);
