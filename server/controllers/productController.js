@@ -82,3 +82,16 @@ export const changeStock = async (req, res) => {
     res.json({ success: false, message: error.message });
   }
 };
+
+// CONTROLLER FUNCTION FOR DELETING THE PRODUCT
+export const deleteProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await Product.findByIdAndDelete(id);
+    return res.json({ success: true, message: "Product deleted" });
+  } catch (error) {
+    console.error("deleteProduct error", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};

@@ -45,35 +45,43 @@ const Orders = () => {
         <div key={order._id} className="bg-white p-2 mt-3 rounded-lg">
           {/* BOOK LIST */}
           <div className="flex flex-col lg:flex-row gap-4 mb-3">
-            {order.items.map((item, index) => (
-              <div key={index} className="flex gap-x-3">
-                <div className="flexCenter rounded-lg overflow-hidden">
-                  <img
-                    src={item.product.image[0]}
-                    alt="orderImg"
-                    className="max-h-20 max-w-32 aspect-square object-contain"
-                  />
-                </div>
-                <div className="w-full block">
-                  <h5 className="h5 capitalize line-clamp-1">
-                    {item.product.name}
-                  </h5>
-                  <div className="flex flex-wrap gap-3 max-sm:gap-y-1 mt-1">
-                    <div className="flex items-center gap-x-2">
-                      <h5 className="medium-14">Price:</h5>
-                      <p>
-                        {currency}
-                        {item.product.offerPrice}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-x-2">
-                      <h5 className="medium-14">Quantity:</h5>
-                      <p>{item.quantity}</p>
+            {order.items.map((item, idx) => {
+              // ← ① guard against a null product
+              if (!item.product) return null;
+
+              // ← ② now it’s safe to pull image/name/offers
+              const imgUrl = item.product.image?.[0] || "/placeholder.png";
+
+              return (
+                <div key={idx} className="flex gap-x-3">
+                  <div className="flexCenter rounded-lg overflow-hidden">
+                    <img
+                      src={imgUrl}
+                      alt={item.product.name || "Unknown product"}
+                      className="max-h-20 max-w-32 aspect-square object-contain"
+                    />
+                  </div>
+                  <div className="w-full block">
+                    <h5 className="h5 capitalize line-clamp-1">
+                      {item.product.name}
+                    </h5>
+                    <div className="flex flex-wrap gap-3 max-sm:gap-y-1 mt-1">
+                      <div className="flex items-center gap-x-2">
+                        <h5 className="medium-14">Price:</h5>
+                        <p>
+                          {currency}
+                          {item.product.offerPrice}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-x-2">
+                        <h5 className="medium-14">Quantity:</h5>
+                        <p>{item.quantity}</p>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
           {/* ORDER SUMMARY */}
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-t border-gray-300 pt-3">

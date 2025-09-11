@@ -39,7 +39,7 @@ const Header = () => {
 */
 
   return (
-    <header className="w-full bg-white shadow max-padd-container flexBetween gap-4 py-4 border-radius">
+    <header className="w-full bg-white shadow max-padd-container flexBetween gap-4 py-4 rounded-2xl">
       {/* {LOGO} */}
       <div className="flex flex-1">
         <Link to={"/"} className="bold-22 xl:bold-28 flex item-end gap-1">

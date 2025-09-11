@@ -221,7 +221,7 @@ const ProductDetails = () => {
               className={`btn-secondary !rounded-md transition-transform duration-150 active:scale-110`}
             >
               {isFav ? (
-                <TbHeartFilled className="text-xl text-red-500 transition-colors duration-200" />
+                <TbHeartFilled className="text-xl text-red-500 transition-colors duration-200 animate-pop" />
               ) : (
                 <TbHeart className="text-xl transition-colors duration-200" />
               )}
