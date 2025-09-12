@@ -3,6 +3,8 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import Ticket from "../models/Ticket.js";
+import crypto from "crypto";
+import nodemailer from "nodemailer";
 
 const cookieOptions = {
   httpOnly: true, // Prevent client-side javascript from accessing the cookie
@@ -12,51 +14,77 @@ const cookieOptions = {
 
 // USER REGISTER ROUTE
 
+// src/controllers/userController.js
+
 export const userRegister = async (req, res) => {
   try {
     const { name, email, password } = req.body;
-    // Checking if user is already exist or not
-    const exist = await User.findOne({ email });
-    if (exist) {
-      return res.json({ success: false, message: "User already exist" });
+
+    // 1) Prevent duplicate
+    if (await User.findOne({ email })) {
+      return res
+        .status(409)
+        .json({ success: false, message: "User already exists" });
     }
-    // Validate password and checking strong password
+
+    // 2) Validate email & password
     if (!validator.isEmail(email)) {
-      return res.json({
+      return res
+        .status(400)
+        .json({ success: false, message: "Please enter a valid email" });
+    }
+    if (password.length < 8) {
+      return res.status(400).json({
         success: false,
-        message: "Please Enter a Valid Email",
+        message: "Password must be at least 8 characters",
       });
     }
 
-    if (password.length < 8) {
-      return res.json({
-        success: false,
-        message: "Please Enter a Strong Password",
-      });
-    }
-    //Hash user password
+    // 3) Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // 4) Generate verification code & expiration
+    const verificationCode = Math.floor(
+      100000 + Math.random() * 900000
+    ).toString();
+    const verificationExpires = Date.now() + 60 * 60 * 1000; // 1 hour
+
+    // 5) Create user (unverified)
     const newUser = new User({
       name,
       email,
       password: hashedPassword,
+      isVerified: false,
+      verificationCode,
+      verificationExpires,
     });
-    const user = await newUser.save();
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
+    await newUser.save();
+
+    // 6) Send verification email
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: +process.env.SMTP_PORT,
+      secure: false,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
     });
-    res.cookie("token", token, {
-      ...cookieOptions,
-      maxAge: 7 * 24 * 60 * 60 * 1000, // Cookie expiration time
+
+    await transporter.sendMail({
+      from: `"Bookstore" <${process.env.SMTP_USER}>`,
+      to: email,
+      subject: "Your Verification Code",
+      html: `<p>Welcome to Bookstore, ${name}!<br/>Your verification code is <b>${verificationCode}</b>. It expires in 1 hour.</p>`,
     });
-    return res.json({
-      success: true,
-      user: { email: user.email, name: user.name },
-    });
+
+    // 7) Respond to client
+    return res
+      .status(201)
+      .json({ success: true, message: "Verification code sent to email" });
   } catch (error) {
-    console.log(error.message);
-    res.json({ success: false, message: error.message });
+    console.error("userRegister error:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
@@ -66,6 +94,12 @@ export const userLogin = async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) {
       return res.json({ success: false, message: "User doesn't exist" });
+    }
+
+    if (!user.isVerified) {
+      return res
+        .status(403)
+        .json({ success: false, message: "Please verify your email first" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -271,5 +305,97 @@ export const changePassword = async (req, res) => {
   } catch (err) {
     console.error("changePassword error:", err);
     res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// VERIFY EMAIL
+export const verifyEmail = async (req, res) => {
+  try {
+    const { email, code } = req.body;
+    const user = await User.findOne({
+      email,
+      verificationCode: code,
+      verificationExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid or expired code" });
+    }
+
+    user.isVerified = true;
+    user.verificationCode = undefined;
+    user.verificationExpires = undefined;
+    await user.save();
+
+    // Issue JWT now that user is verified
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+    res.cookie("token", token, {
+      ...cookieOptions,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    return res.json({ success: true, message: "Email verified" });
+  } catch (err) {
+    console.error("verifyEmail error:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// RESEND VERIFICATION CODE
+export const resendCode = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    // 1) Find the user
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    // 2) Block if already verified
+    if (user.isVerified) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Email already verified" });
+    }
+
+    // 3) Generate new code + expiry
+    const newCode = Math.floor(100000 + Math.random() * 900000).toString();
+    user.verificationCode = newCode;
+    user.verificationExpires = Date.now() + 60 * 60 * 1000; // 1 hour
+    await user.save();
+
+    // 4) Send email with the code
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: +process.env.SMTP_PORT,
+      secure: false,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
+
+    await transporter.sendMail({
+      from: `"Bookstore" <${process.env.SMTP_USER}>`,
+      to: email,
+      subject: "Your New Verification Code",
+      html: `<p>Your new verification code is <b>${newCode}</b>. It expires in 1 hour.</p>`,
+    });
+
+    // 5) Respond
+    return res.json({
+      success: true,
+      message: "A new verification code has been sent",
+    });
+  } catch (err) {
+    console.error("resendCode error:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 };

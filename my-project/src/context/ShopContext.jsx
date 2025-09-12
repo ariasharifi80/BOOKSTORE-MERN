@@ -377,6 +377,19 @@ const ShopContextProvider = ({ children }) => {
     }
   };
 
+  const verifyEmail = async ({ email, code }) => {
+    const { data } = await axios.post("/api/user/verify-email", {
+      email,
+      code,
+    });
+    return data;
+  };
+
+  const resendCode = async ({ email }) => {
+    const { data } = await axios.post("/api/user/resend-code", { email });
+    return data;
+  };
+
   // ── INITIAL LOAD ────────────────────────────────────────────────────────
   useEffect(() => {
     fetchBooks();
@@ -421,6 +434,8 @@ const ShopContextProvider = ({ children }) => {
     setOrders,
     updateProfile,
     changePassword,
+    verifyEmail,
+    resendCode,
     // axios now exposed
     axios,
     // admin exports

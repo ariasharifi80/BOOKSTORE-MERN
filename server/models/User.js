@@ -12,6 +12,9 @@ const userSchema = new mongoose.Schema(
         ref: "product",
       },
     ],
+    isVerified: { type: Boolean, default: false },
+    verificationCode: { type: String },
+    verificationExpires: { type: Date },
   },
   { minimize: false }
 );
