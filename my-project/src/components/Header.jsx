@@ -24,6 +24,7 @@ const Header = () => {
     getCartCount,
     setShowUserLogin,
     logoutUser,
+    fetchPosts,
   } = useContext(ShopContext);
   const isShopPage = useLocation().pathname.endsWith("/shop");
 
@@ -37,6 +38,9 @@ const Header = () => {
   /* - <header className="absolute top-0 left-0 right-0 max-padd-container flexBetween gap-4 py-2">
 + <header className="w-full bg-white shadow max-padd-container flexBetween gap-4 py-4">
 */
+  useEffect(() => {
+    fetchPosts().then(({ posts }) => console.log(posts));
+  }, []);
 
   return (
     <header className="w-full bg-white shadow max-padd-container flexBetween gap-4 py-4 rounded-2xl">

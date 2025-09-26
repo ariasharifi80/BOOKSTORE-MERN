@@ -7,7 +7,7 @@ import Home from "./pages/Home";
 import Shop from "./pages/Shop";
 import CategoryShop from "./pages/CategoryShop";
 import ProductDetails from "./pages/ProductDetails";
-import Blog from "./pages/Blog";
+import Blog from "./pages/BlogList";
 import Contact from "./pages/Contact";
 import Cart from "./pages/Cart";
 import AddressForm from "./pages/AddressForm";
@@ -24,6 +24,14 @@ import EditProduct from "./pages/admin/EditProduct";
 import Orders from "./pages/admin/Orders";
 import AccountPanel from "./pages/AccountPanel";
 import AdminUsers from "./pages/admin/AdminUsers"; // ← import your AdminUsers page
+// Admin — blog
+import PostList from "./pages/admin/PostList";
+import AddPost from "./pages/admin/AddPost";
+import EditPost from "./pages/admin/EditPost";
+
+// Public — blog
+import BlogList from "./pages/BlogList";
+import BlogDetail from "./pages/BlogDetail";
 
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -71,7 +79,16 @@ const App = () => {
 
           {/* Users & Tickets */}
           <Route path="users" element={<AdminUsers />} />
+
+          {/* Blog management */}
+          <Route path="posts" element={<PostList />} />
+          <Route path="posts/new" element={<AddPost />} />
+          <Route path="posts/:slug/edit" element={<EditPost />} />
         </Route>
+
+        {/* Public blog pages */}
+        <Route path="/blog" element={<BlogList />} />
+        <Route path="/blog/:slug" element={<BlogDetail />} />
 
         {/* fallback */}
         <Route path="*" element={null} />

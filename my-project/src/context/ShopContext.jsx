@@ -389,6 +389,83 @@ const ShopContextProvider = ({ children }) => {
     const { data } = await axios.post("/api/user/resend-code", { email });
     return data;
   };
+  // ── BLOG HELPERS ────────────────────────────────────────────────────────
+
+  // 1. List posts (with optional pagination)
+  const fetchPosts = async ({ page = 1, limit = 10, status = "" } = {}) => {
+    try {
+      const { data } = await axios.get("/api/posts", {
+        params: { page, limit, status },
+      });
+      if (data.success) return data;
+      throw new Error(data.message);
+    } catch (err) {
+      toast.error(err.message);
+      return { success: false, posts: [], count: 0 };
+    }
+  };
+
+  // 2. Get a single post by slug
+  const fetchPostBySlug = async (slug) => {
+    try {
+      const { data } = await axios.get(`/api/posts/${slug}`);
+      if (data.success) return data.post;
+      throw new Error(data.message);
+    } catch (err) {
+      toast.error(err.message);
+      return null;
+    }
+  };
+
+  // 3. Create a new post (admin)
+  const createPost = async ({ postData, coverImageFile }) => {
+    try {
+      const formData = new FormData();
+      formData.append("postData", JSON.stringify(postData));
+      if (coverImageFile) formData.append("coverImage", coverImageFile);
+
+      const { data } = await axios.post("/api/posts", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      if (data.success) toast.success("Post created");
+      else throw new Error(data.message);
+      return data.post;
+    } catch (err) {
+      toast.error(err.message);
+      throw err;
+    }
+  };
+
+  // 4. Update an existing post
+  const updatePost = async ({ id, postData, coverImageFile }) => {
+    try {
+      const formData = new FormData();
+      formData.append("postData", JSON.stringify(postData));
+      if (coverImageFile) formData.append("coverImage", coverImageFile);
+
+      const { data } = await axios.put(`/api/posts/${id}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      if (data.success) toast.success("Post updated");
+      else throw new Error(data.message);
+      return data.post;
+    } catch (err) {
+      toast.error(err.message);
+      throw err;
+    }
+  };
+
+  // 5. Delete a post
+  const deletePost = async (id) => {
+    try {
+      const { data } = await axios.delete(`/api/posts/${id}`);
+      if (data.success) toast.success("Post deleted");
+      else throw new Error(data.message);
+    } catch (err) {
+      toast.error(err.message);
+      throw err;
+    }
+  };
 
   // ── INITIAL LOAD ────────────────────────────────────────────────────────
   useEffect(() => {
@@ -436,6 +513,11 @@ const ShopContextProvider = ({ children }) => {
     changePassword,
     verifyEmail,
     resendCode,
+    fetchPosts,
+    fetchPostBySlug,
+    createPost,
+    updatePost,
+    deletePost,
     // axios now exposed
     axios,
     // admin exports
