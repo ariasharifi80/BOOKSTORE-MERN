@@ -419,14 +419,14 @@ const ShopContextProvider = ({ children }) => {
 
   // 3. Create a new post (admin)
   const createPost = async ({ postData, coverImageFile }) => {
+    console.log("📤 createPost helper – postData:", postData);
+    console.log("📤 createPost helper – coverImageFile:", coverImageFile);
     try {
       const formData = new FormData();
       formData.append("postData", JSON.stringify(postData));
       if (coverImageFile) formData.append("coverImage", coverImageFile);
 
-      const { data } = await axios.post("/api/posts", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const { data } = await axios.post("/api/posts", formData);
       if (data.success) toast.success("Post created");
       else throw new Error(data.message);
       return data.post;
@@ -443,9 +443,7 @@ const ShopContextProvider = ({ children }) => {
       formData.append("postData", JSON.stringify(postData));
       if (coverImageFile) formData.append("coverImage", coverImageFile);
 
-      const { data } = await axios.put(`/api/posts/${id}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const { data } = await axios.put(`/api/posts/${id}`, formData);
       if (data.success) toast.success("Post updated");
       else throw new Error(data.message);
       return data.post;

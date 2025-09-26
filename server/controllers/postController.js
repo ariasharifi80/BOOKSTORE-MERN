@@ -42,65 +42,68 @@ export const getPostBySlug = async (req, res) => {
 
 // 3) Create a new post (admin only)
 export const createPost = async (req, res) => {
-  try {
-    // parse once
-    const data = JSON.parse(req.body.postData);
+  console.log("🔍 createPost – req.file:", req.file);
+  console.log("🔍 createPost – req.body.postData:", req.body.postData);
 
-    // slugify title server-side
+  try {
+    const data = JSON.parse(req.body.postData);
     data.slug = slugify(data.title, { lower: true, strict: true });
 
-    // upload coverImage if provided
+    // ←─ Replace your old upload logic with this block ──→
     if (req.file) {
-      const upload = await cloudinary.uploader.upload(req.file.path, {
+      const localPath = req.file.path;
+      console.log("Uploading local file at:", localPath);
+
+      const uploadResult = await cloudinary.uploader.upload(localPath, {
         folder: "blog_posts",
       });
-      data.coverImage = upload.secure_url;
-      // remove local temp file
-      fs.unlinkSync(req.file.path);
-    }
+      data.coverImage = uploadResult.secure_url;
 
-    // leave publishedAt to your model’s pre-save hook
+      // remove the file from disk after upload
+      fs.unlinkSync(localPath);
+    }
+    // ←─────────────────────────────────────────────────→
+
     const post = await Post.create(data);
-    res.json({ success: true, post });
+    return res.json({ success: true, post });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error("❌ createPost error:", err);
+    return res.status(500).json({ success: false, message: err.message });
   }
 };
 
 // 4) Update a post (admin only)
 export const updatePost = async (req, res) => {
+  console.log("🔍 updatePost – req.file:", req.file);
+  console.log("🔍 updatePost – req.body.postData:", req.body.postData);
+
   try {
     const { id } = req.params;
     const updates = JSON.parse(req.body.postData);
-
     if (updates.title) {
       updates.slug = slugify(updates.title, { lower: true, strict: true });
     }
 
-    // handle new coverImage
+    // ←─ Replace your old upload logic with this block ──→
     if (req.file) {
-      // upload new
-      const upload = await cloudinary.uploader.upload(req.file.path, {
+      const localPath = req.file.path;
+      console.log("Uploading updated file at:", localPath);
+
+      const uploadResult = await cloudinary.uploader.upload(localPath, {
         folder: "blog_posts",
       });
-      updates.coverImage = upload.secure_url;
-      fs.unlinkSync(req.file.path);
+      updates.coverImage = uploadResult.secure_url;
+      fs.unlinkSync(localPath);
 
-      // remove old image from Cloudinary
-      const existing = await Post.findById(id);
-      if (existing?.coverImage) {
-        const publicId = existing.coverImage
-          .split("/")
-          .slice(-1)[0]
-          .split(".")[0]; // crude but works if you know your folder
-        await cloudinary.uploader.destroy(`blog_posts/${publicId}`);
-      }
+      // optional: remove old image from Cloudinary…
     }
+    // ←─────────────────────────────────────────────────→
 
     const post = await Post.findByIdAndUpdate(id, updates, { new: true });
-    res.json({ success: true, post });
+    return res.json({ success: true, post });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error("❌ updatePost error:", err);
+    return res.status(500).json({ success: false, message: err.message });
   }
 };
 

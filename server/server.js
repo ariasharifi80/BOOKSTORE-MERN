@@ -6,6 +6,7 @@ import "dotenv/config";
 
 import connectDB from "./config/mongodb.js";
 import connectCloudinary from "./config/cloudinary.js";
+await connectCloudinary();
 
 import userRouter from "./routes/userRoute.js";
 import adminRouter from "./routes/adminRoute.js";
