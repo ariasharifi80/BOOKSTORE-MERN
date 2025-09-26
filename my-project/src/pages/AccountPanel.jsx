@@ -1,8 +1,17 @@
+/* eslint-disable no-unused-vars */
 // src/pages/AccountPanel.jsx
 import React, { useContext, useState, useEffect } from "react";
 import { ShopContext } from "../context/ShopContext";
 import MyOrders from "./MyOrders";
 import toast from "react-hot-toast";
+import { motion } from "framer-motion";
+import {
+  FaUser,
+  FaLock,
+  FaShoppingBag,
+  FaHeart,
+  FaHeadset,
+} from "react-icons/fa";
 
 export default function AccountPanel() {
   const {
@@ -45,12 +54,12 @@ export default function AccountPanel() {
     try {
       const res = await updateProfile({ name, email });
       if (res.success) {
-        toast.success("Profile Updated");
+        toast.success("Profile updated successfully!");
       } else {
         toast.error(res.message);
       }
     } catch (error) {
-      toast.error(error.message || "Update Failed");
+      toast.error(error.message || "Update failed");
     }
   };
 
@@ -59,189 +68,366 @@ export default function AccountPanel() {
     try {
       const res = await changePassword({ currentPassword, newPassword });
       if (res.success) {
-        toast.success("Password changed");
+        toast.success("Password changed successfully!");
         setCurrentPassword("");
         setNewPassword("");
       } else {
         toast.error(res.message);
       }
     } catch (error) {
-      toast.error(error.message || "Change Password failed");
+      toast.error(error.message || "Password change failed");
     }
   };
 
   const handleFavoriteToggle = (id) => toggleFavorite(id);
-
   const handleTicketSubmit = (e) => {
     e.preventDefault();
     submitTicket({ subject, message });
     setSubject("");
     setMessage("");
+    toast.success("Support ticket submitted!");
   };
 
-  const LABELS = ["Profile", "Password", "Orders", "Favorites", "Support"];
+  const TABS = [
+    { id: 0, label: "Profile", icon: <FaUser /> },
+    { id: 1, label: "Password", icon: <FaLock /> },
+    { id: 2, label: "Orders", icon: <FaShoppingBag /> },
+    { id: 3, label: "Favorites", icon: <FaHeart /> },
+    { id: 4, label: "Support", icon: <FaHeadset /> },
+  ];
+
+  // Reusable input component
+  const InputField = ({
+    label,
+    type = "text",
+    value,
+    onChange,
+    required = true,
+    placeholder,
+  }) => (
+    <div className="space-y-2">
+      <label className="block text-sm font-medium text-gray-700">{label}</label>
+      <input
+        type={type}
+        value={value}
+        onChange={onChange}
+        required={required}
+        placeholder={placeholder}
+        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200"
+      />
+    </div>
+  );
+
+  // Reusable textarea component
+  const TextAreaField = ({
+    label,
+    value,
+    onChange,
+    required = true,
+    placeholder,
+    rows = 4,
+  }) => (
+    <div className="space-y-2">
+      <label className="block text-sm font-medium text-gray-700">{label}</label>
+      <textarea
+        value={value}
+        onChange={onChange}
+        required={required}
+        placeholder={placeholder}
+        rows={rows}
+        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200"
+      />
+    </div>
+  );
+
+  // Reusable button component
+  const SubmitButton = ({ children, onClick, type = "submit" }) => (
+    <button
+      type={type}
+      onClick={onClick}
+      className="w-full bg-secondary hover:bg-primary/90 text-white font-medium py-3 px-4 rounded-lg transition duration-200 transform hover:-translate-y-0.5 shadow-sm hover:shadow-md"
+    >
+      {children}
+    </button>
+  );
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      <h2 className="text-2xl font-semibold mb-6">My Account</h2>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="text-center mb-10">
+        <h1 className="text-3xl font-bold text-gray-900">My Account</h1>
+        <p className="text-gray-600 mt-2">
+          Manage your profile, orders, and preferences
+        </p>
+      </div>
 
-      <div className="flex gap-6">
-        {/* Left Sidebar */}
-        <aside className="w-56 bg-white rounded-lg shadow p-4 sticky top-28 h-fit">
-          {LABELS.map((lbl, i) => (
-            <button
-              key={i}
-              onClick={() => setTab(i)}
-              className={`block w-full text-left px-3 py-2 mb-2 rounded transition
-                ${
-                  tab === i
-                    ? "bg-secondary text-white"
-                    : "hover:bg-gray-100 text-gray-700"
-                }
-              `}
-            >
-              {lbl}
-            </button>
-          ))}
+      <div className="flex flex-col lg:flex-row gap-8">
+        {/* Left Sidebar - Modern Navigation */}
+        <aside className="lg:w-64 flex-shrink-0">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="p-6 border-b border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                  <FaUser className="text-gray-600 text-xl" />
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900">{user?.name}</p>
+                  <p className="text-sm text-gray-500">{user?.email}</p>
+                </div>
+              </div>
+            </div>
+
+            <nav className="p-2">
+              {TABS.map((tabItem) => (
+                <motion.button
+                  key={tabItem.id}
+                  onClick={() => setTab(tabItem.id)}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 mb-1 ${
+                    tab === tabItem.id
+                      ? "bg-secondary text-white shadow-md"
+                      : "text-gray-700 hover:bg-secondary/50 hover:text-gray-900"
+                  }`}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <span
+                    className={`text-lg ${tab === tabItem.id ? "text-white" : "text-gray-500"}`}
+                  >
+                    {tabItem.icon}
+                  </span>
+                  <span className="font-medium">{tabItem.label}</span>
+                </motion.button>
+              ))}
+            </nav>
+          </div>
         </aside>
 
-        {/* Main Content */}
-        <div className="flex-1 bg-white rounded-lg shadow p-6 transition-opacity duration-300 opacity-100">
-          {tab === 0 && (
-            <form onSubmit={handleProfileSave} className="space-y-4">
-              <div>
-                <label className="block mb-1">Name</label>
-                <input
-                  className="w-full p-2 border rounded focus:ring-secondary focus:border-secondary"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                />
-              </div>
-              <div>
-                <label className="block mb-1">Email</label>
-                <input
-                  type="email"
-                  className="w-full p-2 border rounded focus:ring-secondary focus:border-secondary"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-              <button type="submit" className="btn-secondary">
-                Save Profile
-              </button>
-            </form>
-          )}
+        {/* Main Content Area */}
+        <div className="flex-1">
+          <motion.div
+            key={tab}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden"
+          >
+            <div className="p-6 md:p-8">
+              {/* Profile Tab */}
+              {tab === 0 && (
+                <div className="max-w-2xl mx-auto">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                    Profile Information
+                  </h2>
+                  <form onSubmit={handleProfileSave} className="space-y-6">
+                    <InputField
+                      label="Full Name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Enter your full name"
+                    />
+                    <InputField
+                      label="Email Address"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Enter your email address"
+                    />
+                    <SubmitButton>Save Changes</SubmitButton>
+                  </form>
+                </div>
+              )}
 
-          {tab === 1 && (
-            <form onSubmit={handleChangePassword} className="space-y-4">
-              <div>
-                <label className="block mb-1">Current Password</label>
-                <input
-                  type="password"
-                  className="w-full p-2 border rounded focus:ring-secondary focus:border-secondary"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  required
-                />
-              </div>
-              <div>
-                <label className="block mb-1">New Password</label>
-                <input
-                  type="password"
-                  className="w-full p-2 border rounded focus:ring-secondary focus:border-secondary"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  required
-                />
-              </div>
-              <button type="submit" className="btn-secondary">
-                Change Password
-              </button>
-            </form>
-          )}
+              {/* Password Tab */}
+              {tab === 1 && (
+                <div className="max-w-2xl mx-auto">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                    Change Password
+                  </h2>
+                  <form onSubmit={handleChangePassword} className="space-y-6">
+                    <InputField
+                      label="Current Password"
+                      type="password"
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                      placeholder="Enter your current password"
+                    />
+                    <InputField
+                      label="New Password"
+                      type="password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="Enter your new password"
+                    />
+                    <SubmitButton>Update Password</SubmitButton>
+                  </form>
+                </div>
+              )}
 
-          {tab === 2 && (
-            <div className="space-y-4">
-              <div className="-mt-23">
-                <MyOrders orders={userOrders} />
-              </div>
-            </div>
-          )}
-
-          {tab === 3 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {userFavorites.length ? (
-                userFavorites.map((b) => (
-                  <div
-                    key={b._id}
-                    className="p-4 border rounded flex justify-between items-center"
-                  >
-                    <span>{b.name}</span>
-                    <button
-                      onClick={() => handleFavoriteToggle(b._id)}
-                      className="text-red-500 hover:text-red-600"
-                    >
-                      Remove
-                    </button>
+              {/* Orders Tab */}
+              {tab === 2 && (
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                    My Orders
+                  </h2>
+                  <div className="-mx-6 -mt-6">
+                    <MyOrders orders={userOrders} />
                   </div>
-                ))
-              ) : (
-                <p className="text-gray-500">No favorites yet.</p>
+                </div>
+              )}
+
+              {/* Favorites Tab */}
+              {tab === 3 && (
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                    My Favorites
+                  </h2>
+                  {userFavorites.length ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {userFavorites.map((book) => (
+                        <motion.div
+                          key={book._id}
+                          className="border border-gray-200 rounded-xl p-4 flex items-center justify-between hover:shadow-md transition-shadow duration-200"
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <img
+                              src={book.image?.[0] || "/placeholder-book.jpg"}
+                              alt={book.name}
+                              className="w-12 h-16 object-cover rounded-lg flex-shrink-0"
+                            />
+                            <div className="min-w-0">
+                              <h3 className="font-medium text-gray-900 line-clamp-1">
+                                {book.name}
+                              </h3>
+                              <p className="text-sm text-gray-600">
+                                by {book.author}
+                              </p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => handleFavoriteToggle(book._id)}
+                            className="text-red-500 hover:text-red-600 p-2 hover:bg-red-50 rounded-full transition-colors duration-200"
+                            aria-label="Remove from favorites"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-5 w-5"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          </button>
+                        </motion.div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <div className="text-5xl mb-4">❤️</div>
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">
+                        No favorites yet
+                      </h3>
+                      <p className="text-gray-600">
+                        Start adding books to your favorites to see them here!
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Support Tab */}
+              {tab === 4 && (
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                    Support & Help
+                  </h2>
+
+                  {/* Submit Ticket Form */}
+                  <div className="bg-white rounded-xl p-6 mb-8">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                      Submit a Support Ticket
+                    </h3>
+                    <form onSubmit={handleTicketSubmit} className="space-y-4">
+                      <InputField
+                        label="Subject"
+                        value={subject}
+                        onChange={(e) => setSubject(e.target.value)}
+                        placeholder="What is your issue about?"
+                      />
+                      <TextAreaField
+                        label="Message"
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        placeholder="Please describe your issue in detail..."
+                      />
+                      <SubmitButton>Submit Ticket</SubmitButton>
+                    </form>
+                  </div>
+
+                  {/* Previous Tickets */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                      Your Support Tickets
+                    </h3>
+                    {userTickets.length ? (
+                      <div className="space-y-4">
+                        {userTickets.map((ticket) => (
+                          <motion.div
+                            key={ticket._id}
+                            className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow duration-200"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            <div className="flex justify-between items-start mb-3">
+                              <h4 className="font-semibold text-gray-900">
+                                {ticket.subject}
+                              </h4>
+                              <span
+                                className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                  ticket.status === "open"
+                                    ? "bg-yellow-100 text-yellow-800"
+                                    : "bg-green-100 text-green-800"
+                                }`}
+                              >
+                                {ticket.status}
+                              </span>
+                            </div>
+                            <p className="text-gray-600 mb-3">
+                              {ticket.message}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              Submitted on{" "}
+                              {new Date(ticket.createdAt).toLocaleDateString(
+                                "en-US",
+                                {
+                                  year: "numeric",
+                                  month: "short",
+                                  day: "numeric",
+                                },
+                              )}
+                            </p>
+                          </motion.div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <div className="text-4xl mb-3">🎫</div>
+                        <p className="text-gray-600">
+                          You haven't submitted any support tickets yet.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
               )}
             </div>
-          )}
-
-          {tab === 4 && (
-            <>
-              <form onSubmit={handleTicketSubmit} className="space-y-4 mb-6">
-                <div>
-                  <label className="block mb-1">Subject</label>
-                  <input
-                    className="w-full p-2 border rounded focus:ring-secondary focus:border-secondary"
-                    value={subject}
-                    onChange={(e) => setSubject(e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block mb-1">Message</label>
-                  <textarea
-                    className="w-full p-2 border rounded focus:ring-secondary focus:border-secondary"
-                    rows="4"
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    required
-                  />
-                </div>
-                <button type="submit" className="btn-secondary">
-                  Submit Ticket
-                </button>
-              </form>
-
-              {userTickets.length ? (
-                <ul className="space-y-4">
-                  {userTickets.map((t) => (
-                    <li
-                      key={t._id}
-                      className="border rounded p-4 flex flex-col gap-2"
-                    >
-                      <p className="font-medium">{t.subject}</p>
-                      <p className="text-sm text-gray-600">{t.message}</p>
-                      <p className="text-xs text-gray-500">
-                        Status:{" "}
-                        <span className="font-semibold">{t.status}</span> •{" "}
-                        {new Date(t.createdAt).toLocaleString()}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-gray-500">No tickets submitted.</p>
-              )}
-            </>
-          )}
+          </motion.div>
         </div>
       </div>
     </div>

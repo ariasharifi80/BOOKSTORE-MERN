@@ -1,83 +1,145 @@
+/* eslint-disable no-unused-vars */
+// src/components/Achievements.jsx
 import React from "react";
-import Title from "./Title";
+import { motion } from "framer-motion";
 import { RiSecurePaymentLine, RiSoundModuleLine } from "react-icons/ri";
 import { FaUsersLine } from "react-icons/fa6";
 import { TbLocation } from "react-icons/tb";
 
 const Achievements = () => {
   const statistics = [
-    { label: "Happy Clients", value: 15 },
-    { label: "Book Stock", value: 29 },
-    { label: "Total Sales", value: 45 },
+    { label: "Happy Clients", value: 15, suffix: "K+" },
+    { label: "Book Stock", value: 29, suffix: "K+" },
+    { label: "Total Sales", value: 45, suffix: "K+" },
   ];
 
-  return (
-    <section className="mx-auto max-w-[1440px] ">
-      {/* CONTAINER */}
-      <div className="flex flex-col xl:flex-row gap-12">
-        {/* LEFT SIDE */}
-        <div className="flex-[2] flex justify-center flex-col bg-gradient-to-l from-tertiary/40 to-white px-6 lg:px-12 py-16">
-          <h2 className="h2">Our Journey So Far</h2>
-          <p className="py-5 max-w-[47rem]">
-            From a Small idea to a growing library, our journey has been fueled
-            by a love for stories, knowledge, and the joy of sharing books with
-            readers from all walks of life.
-          </p>
+  const features = [
+    {
+      icon: <RiSecurePaymentLine className="text-2xl" />,
+      title: "Fast & Secure",
+      desc: "Optimized performance with end-to-end encryption",
+    },
+    {
+      icon: <RiSoundModuleLine className="text-2xl" />,
+      title: "Advanced Filtering",
+      desc: "Find books by genre, author, or rating in seconds",
+    },
+    {
+      icon: <FaUsersLine className="text-2xl" />,
+      title: "User Reviews",
+      desc: "Trusted ratings & authentic community feedback",
+    },
+    {
+      icon: <TbLocation className="text-2xl" />,
+      title: "Order Tracking",
+      desc: "Real-time updates from warehouse to doorstep",
+    },
+  ];
 
-          {/* STATISTICS CONTAINER */}
-          <div className="flex flex-wrap gap-4">
-            {statistics.map((statistic, index) => (
-              <div key={index} className="p-4 rounded-lg">
-                <div className="flex items-center gap-1">
-                  <h3 className="text-5xl font-sans">{statistic.value}</h3>
-                  <h4 className="regular-32">K+</h4>
+  // Animation variants
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15,
+      },
+    },
+  };
+
+  const item = {
+    hidden: { y: 20, opacity: 0 },
+    show: { y: 0, opacity: 1, transition: { duration: 0.5 } },
+  };
+
+  return (
+    <section className="mx-auto max-w-[1440px] px-4 py-16 md:py-24">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+        {/* Left Side - Stats */}
+        <motion.div
+          className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-8 md:p-10 shadow-lg border border-gray-100"
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-100px" }}
+          variants={container}
+        >
+          <motion.h2
+            className="text-3xl md:text-4xl font-bold text-gray-900 mb-4"
+            variants={item}
+          >
+            Our Journey So Far
+          </motion.h2>
+          <motion.p
+            className="text-gray-600 mb-8 max-w-lg leading-relaxed"
+            variants={item}
+          >
+            From a small idea to a growing library, our journey has been fueled
+            by a love for stories, knowledge, and the joy of sharing books with
+            readers worldwide.
+          </motion.p>
+
+          {/* Stats Grid */}
+          <motion.div className="grid grid-cols-3 gap-4" variants={container}>
+            {statistics.map((stat, index) => (
+              <motion.div
+                key={index}
+                className="text-center p-4 bg-white/60 backdrop-blur-sm rounded-xl border border-gray-100 hover:bg-white transition-all duration-300"
+                variants={item}
+                whileHover={{ y: -5 }}
+              >
+                <div className="flex justify-center items-end gap-1 mb-2">
+                  <span className="text-3xl md:text-4xl font-bold text-gray-600">
+                    {stat.value}
+                  </span>
+                  <span className="text-lg text-gray-500">{stat.suffix}</span>
                 </div>
-                <p className="capitalize pt-2">{statistic.label}</p>
-              </div>
+                <p className="text-sm text-gray-600 font-medium">
+                  {stat.label}
+                </p>
+              </motion.div>
+            ))}
+          </motion.div>
+        </motion.div>
+
+        {/* Right Side - Features */}
+        <motion.div
+          className="space-y-6"
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true }}
+          variants={container}
+        >
+          <div>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+              About <span className="text-gray-600">Us</span>
+            </h2>
+            <p className="text-gray-600 max-w-md">
+              We build more than just a bookstore — we create a reading
+              experience.
+            </p>
+          </div>
+
+          <div className="space-y-5">
+            {features.map((feature, index) => (
+              <motion.div
+                key={index}
+                className="flex items-start gap-4 p-4 rounded-xl bg-white/40 backdrop-blur-sm border border-gray-100 hover:bg-white hover:shadow-md transition-all duration-300"
+                variants={item}
+                whileHover={{ x: 5 }}
+              >
+                <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-gray-600">
+                  {feature.icon}
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-1">
+                    {feature.title}
+                  </h3>
+                  <p className="text-sm text-gray-600">{feature.desc}</p>
+                </div>
+              </motion.div>
             ))}
           </div>
-        </div>
-        {/* RIGHT SIDE */}
-        <div className="flex-1 relative max-sm:pl-8 flex items-center xl:justify-center pt-5">
-          <div className="flex-col">
-            <Title
-              title1={"About"}
-              title2={"Us"}
-              titleStyles={"pb-10"}
-              paraStyles={"hidden"}
-            />
-            <div className="flex flex-col items-start">
-              <div className="flexCenter gap-3 mb-3">
-                <RiSecurePaymentLine className="text-xl" />
-                <div>
-                  <h5 className="h5">Fast & Secure</h5>
-                  <p>Optimized performance</p>
-                </div>
-              </div>
-              <div className="flexCenter gap-3 mb-3">
-                <RiSoundModuleLine className="text-xl" />
-                <div>
-                  <h5 className="h5">Advance Filtering</h5>
-                  <p>Find books quickly</p>
-                </div>
-              </div>
-              <div className="flexCenter gap-3 mb-3">
-                <FaUsersLine className="text-xl" />
-                <div>
-                  <h5 className="h5">User Reviews</h5>
-                  <p>Rating & FeedBack</p>
-                </div>
-              </div>
-              <div className="flexCenter gap-3 mb-3">
-                <TbLocation className="text-xl" />
-                <div>
-                  <h5 className="h5">Order Tracking</h5>
-                  <p>Live Order Status</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
