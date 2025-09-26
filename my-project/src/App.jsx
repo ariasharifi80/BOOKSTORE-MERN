@@ -20,6 +20,7 @@ import Sidebar from "./components/admin/Sidebar";
 import AdminLogin from "./components/admin/AdminLogin";
 import AddProduct from "./pages/admin/AddProduct";
 import ProductList from "./pages/admin/ProductList";
+import EditProduct from "./pages/admin/EditProduct";
 import Orders from "./pages/admin/Orders";
 import AccountPanel from "./pages/AccountPanel";
 import AdminUsers from "./pages/admin/AdminUsers"; // ← import your AdminUsers page
@@ -63,6 +64,7 @@ const App = () => {
 
           {/* Product List */}
           <Route path="list" element={<ProductList />} />
+          <Route path="list/:id/edit" element={<EditProduct />} />
 
           {/* Orders */}
           <Route path="orders" element={<Orders />} />

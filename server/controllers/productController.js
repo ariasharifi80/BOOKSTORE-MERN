@@ -95,3 +95,42 @@ export const deleteProduct = async (req, res) => {
     return res.status(500).json({ success: false, message: error.message });
   }
 };
+
+//CONTROLLER FUNCTION FOR EDITING A PRODUCT
+
+// UPDATE A PRODUCT
+export const updateProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // 1) Parse JSON data if you sent multipart/form-data
+    let updates = { ...req.body };
+
+    // 2) Handle new images (optional)
+    if (req.files && req.files.length) {
+      const imagesUrl = await Promise.all(
+        req.files.map(async (file) => {
+          const result = await cloudinary.uploader.upload(file.path, {
+            resource_type: "image",
+          });
+          return result.secure_url;
+        })
+      );
+      updates.image = imagesUrl;
+    }
+
+    // 3) Apply the update
+    const product = await Product.findByIdAndUpdate(id, updates, {
+      new: true,
+    });
+
+    return res.json({
+      success: true,
+      message: "Product updated",
+      product,
+    });
+  } catch (error) {
+    console.error("updateProduct error:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};

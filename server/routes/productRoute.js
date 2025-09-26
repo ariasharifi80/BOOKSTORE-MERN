@@ -7,6 +7,7 @@ import {
   listProduct,
   singleProduct,
   deleteProduct,
+  updateProduct,
 } from "../controllers/productController.js";
 
 const productRouter = express.Router();
@@ -16,5 +17,6 @@ productRouter.get("/list", listProduct);
 productRouter.post("/single", singleProduct);
 productRouter.post("/stock", changeStock);
 productRouter.delete("/:id", deleteProduct);
+productRouter.put("/:id", authAdmin, upload.array("images"), updateProduct);
 
 export default productRouter;

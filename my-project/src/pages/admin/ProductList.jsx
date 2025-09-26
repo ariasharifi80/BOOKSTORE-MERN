@@ -3,7 +3,8 @@ import { ShopContext } from "../../context/ShopContext";
 import toast from "react-hot-toast";
 
 const ProductList = () => {
-  const { books, currency, axios, fetchBooks } = useContext(ShopContext);
+  const { books, currency, axios, fetchBooks, navigate } =
+    useContext(ShopContext);
 
   const toggleStock = async (productId, inStock) => {
     try {
@@ -42,18 +43,20 @@ const ProductList = () => {
   return (
     <div className="px-2 sm:px-6 py-12 m-2 h-[97vh] bg-primary overflow-y-scroll lg:w-4/5 rounded-xl">
       <div className="flex flex-col gap-2">
-        <div className="grid grid-cols-[1fr_3.5fr_1fr_1fr_1fr_1fr] items-center py-1 px-2 bg-white bold-14 sm:bold-15 mb-1 rounded ">
+        <div className="grid grid-cols-[1fr_3.5fr_1fr_1fr_1fr_1fr_1fr] items-center py-1 px-2 bg-white bold-14 sm:bold-15 mb-1 rounded ">
           <h5>Image</h5>
           <h5>Name</h5>
           <h5>Category</h5>
           <h5>Price</h5>
           <h5>In Stock</h5>
+          <h5>Delete</h5>
+          <h5>Edit</h5>
         </div>
         {/* PRODUCT LIST */}
         {books.map((book) => (
           <div
             key={book._id}
-            className="grid grid-cols-[1fr_3.5fr_1fr_1fr_1fr_1fr] items-center py-1 px-2 bg-white bold-14 sm:bold-15 mb-1 rounded"
+            className="grid grid-cols-[1fr_3.5fr_1fr_1fr_1fr_1fr_1fr] items-center py-1 px-2 bg-white bold-14 sm:bold-15 mb-1 rounded"
           >
             <img
               src={book.image[0]}
@@ -84,6 +87,14 @@ const ProductList = () => {
                 className="text-white bg-red-500 hover:bg-red-600 px-2 py-1 rounded transition-colors "
               >
                 Delete
+              </button>
+            </div>
+            <div>
+              <button
+                onClick={() => navigate(`/admin/list/${book._id}/edit`)}
+                className="text-white bg-blue-500 hover:bg-blue-600 px-2 py-1 rounded"
+              >
+                Edit
               </button>
             </div>
           </div>
