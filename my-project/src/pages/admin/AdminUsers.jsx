@@ -15,6 +15,21 @@ const AdminUsers = () => {
     adminExportTickets,
   } = useContext(ShopContext);
 
+  // Add the formatDate helper function
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+
+    const date = new Date(dateString);
+
+    // Check if the date is valid
+    if (isNaN(date.getTime())) {
+      console.warn("Invalid date received:", dateString);
+      return "Invalid Date";
+    }
+
+    return date.toLocaleDateString();
+  };
+
   const [search, setSearch] = useState("");
   const [expanded, setExpanded] = useState(null);
   const [page, setPage] = useState(1);
@@ -75,9 +90,7 @@ const AdminUsers = () => {
                 <tr className="border-t">
                   <td className="p-2">{u.name}</td>
                   <td className="p-2">{u.email}</td>
-                  <td className="p-2">
-                    {new Date(u.createdAt).toLocaleDateString()}
-                  </td>
+                  <td className="p-2">{formatDate(u.createdAt)}</td>
                   <td className="p-2 flex justify-center gap-2">
                     <button
                       onClick={() => handleExpand(u._id)}
@@ -96,7 +109,7 @@ const AdminUsers = () => {
 
                 {expanded === u._id && (
                   <tr>
-                    <td colSpan={4} className="bg-gray-50 p-4">
+                    <td colSpan={4} className="bg-gray-100 p-4">
                       <div className="flex justify-between items-center mb-2">
                         <h3 className="font-semibold">Tickets</h3>
                         <button
@@ -128,7 +141,7 @@ const AdminUsers = () => {
                                   <span className="font-semibold">
                                     {t.status}
                                   </span>{" "}
-                                  • {new Date(t.createdAt).toLocaleString()}
+                                  • {formatDate(t.createdAt)}
                                 </p>
                               </div>
                               <div className="flex flex-col gap-2 ml-4">

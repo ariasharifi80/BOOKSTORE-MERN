@@ -16,7 +16,7 @@ const userSchema = new mongoose.Schema(
     verificationCode: { type: String },
     verificationExpires: { type: Date },
   },
-  { minimize: false }
+  { minimize: false, timestamps: true }
 );
 
 const User = mongoose.model.user || mongoose.model("user", userSchema);
